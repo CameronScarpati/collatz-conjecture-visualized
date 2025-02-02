@@ -251,19 +251,30 @@ void drawIncrementalCollatzGraph() {
         if (it != collatzBranches.end()) {
             const auto &values = it->second;
 
-            // Make the current branch thicker
-            glLineWidth(5.0f);
-
+            // --- First Pass: Draw glow effect ---
+            glLineWidth(8.0f);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glBegin(GL_LINE_STRIP);
             for (int i = 0; i <= currentIndex && i < (int)values.size(); ++i) {
                 float r, g, b;
                 getRainbowColor(i, r, g, b);
+                glColor4f(r, g, b, 0.3f); // semi-transparent glow
+                glVertex2f(scaleX(i), scaleY(values[i]));
+            }
+            glEnd();
+            glDisable(GL_BLEND);
 
+            // --- Second Pass: Draw the brightened current branch ---
+            glLineWidth(5.0f);
+            glBegin(GL_LINE_STRIP);
+            for (int i = 0; i <= currentIndex && i < (int)values.size(); ++i) {
+                float r, g, b;
+                getRainbowColor(i, r, g, b);
                 // Brighten line.
                 r = std::min(r * 1.2f, 1.0f);
                 g = std::min(g * 1.2f, 1.0f);
                 b = std::min(b * 1.2f, 1.0f);
-
                 glColor3f(r, g, b);
                 glVertex2f(scaleX(i), scaleY(values[i]));
             }
