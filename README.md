@@ -27,7 +27,7 @@
 
 ## About The Project
 
-[![Product Screenshot][product-screenshot]](https://example.com)
+![Collatz Conjecture Visualization](images/Collatz%20Conjecture%20Linear%20Scale%20(10%20Branches).png)
 
 This project provides an interactive visualization of the Collatz Conjecture. It computes and animates the sequences of numbers using OpenGL and allows users to explore how different numbers evolve according to the Collatz formula.
 
@@ -159,4 +159,3 @@ Project Link: [https://github.com/CameronScarpati/collatz-conjecture-visualized]
 [license-url]: https://github.com/CameronScarpati/collatz-conjecture-visualized/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/cameron-scarpati
-[product-screenshot]: images/screenshot.png
