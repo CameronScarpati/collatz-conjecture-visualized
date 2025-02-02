@@ -6,33 +6,27 @@ constexpr int CollatzConjecture::applyCollatzFormula(int num) {
 }
 
 void CollatzConjecture::computeCollatz(int n) {
-    if (n < 1) {
+    if (n < 1)
         throw std::runtime_error("computeCollatz: Only positive integers are allowed.");
-    }
 
     // Only compute for the range (maxComputed+1) to n
     // If n <= maxComputed, we've already computed everything up to n.
-    for (int i = maxComputed + 1; i <= n; ++i) {
+    for (int i = maxComputed + 1; i <= n; ++i)
         computeSequence(i);
-    }
 
     // Update maxComputed if needed
-    if (n > maxComputed) {
+    if (n > maxComputed)
         maxComputed = n;
-    }
 }
 
 const std::vector<int>& CollatzConjecture::computeSequence(int num) {
-    // If already in cache, return it
     auto it = collatzTree.find(num);
-    if (it != collatzTree.end()) {
+    if (it != collatzTree.end())
         return it->second;
-    }
 
     // Base case
     if (num == 1) {
-        collatzTree[num] = {1};
-        allNodes.insert(num);
+        collatzTree[num] = {1, 4, 2, 1};
         return collatzTree[num];
     }
 
@@ -46,20 +40,10 @@ const std::vector<int>& CollatzConjecture::computeSequence(int num) {
     seq.push_back(num);
     seq.insert(seq.end(), nextSeq.begin(), nextSeq.end());
 
-    // Store in cache
     collatzTree[num] = std::move(seq);
-
-    // Insert 'num' into allNodes
-    allNodes.insert(num);
-
-    // Return the newly inserted sequence
     return collatzTree[num];
 }
 
-const std::unordered_map<int, std::vector<int>>& CollatzConjecture::getCollatzTree() const {
+const std::unordered_map<int, std::vector<int>>& CollatzConjecture::getCollatzBranches() const {
     return collatzTree;
-}
-
-const std::unordered_set<int>& CollatzConjecture::getAllNodes() const {
-    return allNodes;
 }

@@ -6,17 +6,16 @@
 #endif
 
 #include "collatz-conjecture.h"
-#include <iostream>
 #include <cmath>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 // Global variables & toggles
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 CollatzConjecture collatz;
-std::unordered_map<int, std::vector<int>> collatzTree;
+std::unordered_map<int, std::vector<int>> collatzBranches;
 
 int maxN = 0;
 
@@ -35,7 +34,7 @@ bool animationDone  = false;
 bool animationPause = false;
 
 // Animation speed
-int ANIMATION_DELAY_MS = 30;
+int ANIMATION_DELAY_MS = 50;
 
 // Stats data structures
 struct CollatzStats {
@@ -53,61 +52,59 @@ int branchesDone   = 0;
 bool useLogScale   = true;
 bool showHelp      = true;
 
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 // Prompt mode for entering a new maxN on-screen
-// ------------------------------------------------------------------
-bool        promptForNewMaxN = false;   // are we currently prompting user for new input?
-std::string inputBuffer;                // the characters typed by user
-std::string errorMessage;               // if out-of-range input, display error
+// -------------------------------------------------------------
+bool promptForNewMaxN = false; // Are we currently prompting user for new input?
+std::string inputBuffer;       // The characters typed by user.
+std::string errorMessage;      // If the input is invalid, display error.
 
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 // Forward declarations
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 void computeAxisLimits();
 void resetWithNewMaxN(int newN);
 void display();
 void timer(int = 0);
 
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 // Utility & drawing functions
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 
 void computeAxisLimits() {
     maxIterations = 0.0f;
     maxValue      = 1.0f;
-    for (const auto& [start, values] : collatzTree) {
-        auto size = static_cast<float>(values.size());
-        if (size > maxIterations) {
-            maxIterations = size;
-        }
-        for (int v : values) {
-            if (v > maxValue) {
+
+    for (const auto& [start, values] : collatzBranches) {
+        unsigned long size = values.size();
+
+        if ((float) size > maxIterations)
+            maxIterations = (float) size;
+
+        for (int v : values)
+            if ((float) v > maxValue)
                 maxValue = static_cast<float>(v);
-            }
-        }
     }
 }
 
 float scaleX(int step) {
-    if (maxIterations == 0) return 0.0f;
-    return (step / maxIterations) * 2.0f - 1.0f;
+    if (maxIterations == 0)
+        return 0.0f;
+    return ((float) step / maxIterations) * 2.0f - 1.0f;
 }
 
 float scaleY(int value) {
     // Always pin value <= 1 to the bottom.
-    if (value <= 1) {
+    if (value <= 1)
         return -1.0f;
-    }
 
     if (useLogScale) {
         // Normal log-scale formula
         float ratio = std::log2((float)value) / std::log2(maxValue);
         return ratio * 2.0f - 1.0f;
     }
-    else {
-        // Linear scale as before
+    else
         return (static_cast<float>(value) / maxValue) * 2.0f - 1.0f;
-    }
 }
 
 void hsvToRgb(float H, float S, float V, float &r, float &g, float &b) {
@@ -116,7 +113,7 @@ void hsvToRgb(float H, float S, float V, float &r, float &g, float &b) {
     float m = V - C;
     float rPrime, gPrime, bPrime;
 
-    if      (H < 60)  { rPrime = C; gPrime = X; bPrime = 0; }
+    if (H < 60)       { rPrime = C; gPrime = X; bPrime = 0; }
     else if (H < 120) { rPrime = X; gPrime = C; bPrime = 0; }
     else if (H < 180) { rPrime = 0; gPrime = C; bPrime = X; }
     else if (H < 240) { rPrime = 0; gPrime = X; bPrime = C; }
@@ -130,11 +127,12 @@ void hsvToRgb(float H, float S, float V, float &r, float &g, float &b) {
 
 void getRainbowColor(int step, float &r, float &g, float &b) {
     float ratio = 0.0f;
-    if (maxIterations > 1.0f) {
+    if (maxIterations > 1.0f)
         ratio = (static_cast<float>(step) / (maxIterations - 1.0f));
-    }
-    if (ratio < 0.0f) ratio = 0.0f;
-    if (ratio > 1.0f) ratio = 1.0f;
+    if (ratio < 0.0f)
+        ratio = 0.0f;
+    if (ratio > 1.0f)
+        ratio = 1.0f;
 
     float hue = 300.0f * ratio;
     hsvToRgb(hue, 1.0f, 1.0f, r, g, b);
@@ -142,9 +140,8 @@ void getRainbowColor(int step, float &r, float &g, float &b) {
 
 void drawText(float x, float y, const std::string &text) {
     glRasterPos2f(x, y);
-    for (char c : text) {
+    for (char c : text)
         glutBitmapCharacter(GLUT_BITMAP_9_BY_15, c);
-    }
 }
 
 void drawHelpMenu() {
@@ -215,7 +212,7 @@ void drawAxes() {
             drawText(-1.08f, yPos, std::to_string(val));
         }
     } else {
-        // linear intervals
+        // linear intervalues
         if (maxValue >= 1.0f) {
             int increment = std::max(1, (int)maxValue / 8);
             for (int val = 0; val <= (int)maxValue; val += increment) {
@@ -234,8 +231,8 @@ void drawIncrementalCollatzGraph() {
     // 1. Draw all completed branches with normal line style
     glLineWidth(2.0f);
     for (int branch = 1; branch < currentBranch; branch++) {
-        auto it = collatzTree.find(branch);
-        if (it == collatzTree.end()) continue;
+        auto it = collatzBranches.find(branch);
+        if (it == collatzBranches.end()) continue;
         const auto &values = it->second;
 
         glBegin(GL_LINE_STRIP);
@@ -250,23 +247,19 @@ void drawIncrementalCollatzGraph() {
 
     // 2. Draw partial of the branch that is currently animating
     if (!animationDone) {
-        auto it = collatzTree.find(currentBranch);
-        if (it != collatzTree.end()) {
+        auto it = collatzBranches.find(currentBranch);
+        if (it != collatzBranches.end()) {
             const auto &values = it->second;
 
             // Make the current branch thicker
             glLineWidth(5.0f);
 
-            // Optionally begin a new color
-            // glColor3f(1.0f, 1.0f, 0.0f); // for a solid highlight color
-            // But let's just keep the rainbow color and maybe intensify it
-
             glBegin(GL_LINE_STRIP);
             for (int i = 0; i <= currentIndex && i < (int)values.size(); ++i) {
                 float r, g, b;
                 getRainbowColor(i, r, g, b);
-                // optionally brighten the color a bit
-                // e.g., clamp them in [0,1], or multiply by factor
+
+                // Brighten line.
                 r = std::min(r * 1.2f, 1.0f);
                 g = std::min(g * 1.2f, 1.0f);
                 b = std::min(b * 1.2f, 1.0f);
@@ -276,20 +269,18 @@ void drawIncrementalCollatzGraph() {
             }
             glEnd();
 
-            // Restore line width to normal
-            glLineWidth(2.0f);
+            glLineWidth(2.0f); // Restore line width to normal
         }
     }
 }
 
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 // MAIN display function (with on-screen prompt logic)
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
 
-    // If we are prompting for new maxN, draw the overlay.
     if (promptForNewMaxN) {
         glColor3f(1.0f, 1.0f, 1.0f);
         drawText(-0.5f, 0.0f, "Enter new maxN: " + inputBuffer);
@@ -305,17 +296,17 @@ void display() {
         return;
     }
 
-    // -- Normal chart display mode --
+    // Normal chart display mode
     drawAxes();
     drawIncrementalCollatzGraph();
 
-    // If still animating, partial stats
+    // If still animating, display partial stats
     if (!animationDone) {
         CollatzStats currentSt = collatzStatsMap[currentBranch];
         int partialPeak = 1;
-        const auto &vals = collatzTree[currentBranch];
-        for (int i = 0; i <= currentIndex && i < (int)vals.size(); i++) {
-            if (vals[i] > partialPeak) partialPeak = vals[i];
+        const auto &values = collatzBranches[currentBranch];
+        for (int i = 0; i <= currentIndex && i < (int)values.size(); i++) {
+            if (values[i] > partialPeak) partialPeak = values[i];
         }
 
         glColor3f(1.0f, 1.0f, 0.0f);
@@ -343,16 +334,16 @@ void display() {
         drawText(-0.1f, 1.1f, "Animation Complete!");
     }
 
-    // Help menu (top-right), if toggled on
+    // Help menu (top-right), if toggled on.
     if (showHelp) {
         drawHelpMenu();
     }
 
-    // ----------------------------------------------------------------------
+    // -----------------------------------------------------------------
     // NEW: Draw the animation delay & scale info near the bottom
-    // ----------------------------------------------------------------------
+    // -----------------------------------------------------------------
     glColor3f(1.0f, 1.0f, 1.0f);
-    // For example, place them at x=-1.15, y ~ -1.10 and -1.15 so it doesn’t overlap the axis
+    // For example, place them at x=-1.15, y ~ -1.10 and -1.15, so it doesn't overlap the axis
     drawText(-0.2f, -1.10f,
              "Current animation delay: " + std::to_string(ANIMATION_DELAY_MS) + " ms");
     drawText(-0.2f, -1.15f,
@@ -363,65 +354,58 @@ void display() {
     glutSwapBuffers();
 }
 
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 // RESET logic (clears the screen & stats, sets new maxN)
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 void resetWithNewMaxN(int newN)
 {
-    if (newN < 1) {
-        std::cerr << "Invalid input! Must be >= 1.\n";
-        return;
-    }
     maxN = newN;
 
     // Clear everything
     collatz = CollatzConjecture();
     collatz.computeCollatz(maxN);
-    collatzTree = collatz.getCollatzTree();
+    collatzBranches = collatz.getCollatzBranches();
 
     computeAxisLimits();
 
     // Populate stats
     collatzStatsMap.clear();
-    for (const auto &pair : collatzTree) {
+    for (const auto &pair : collatzBranches) {
         int startVal = pair.first;
         const auto &sequence = pair.second;
 
         CollatzStats s{};
         s.steps = (int)sequence.size() - 1;
         s.peak  = 1;
-        for (int val : sequence) {
-            if (val > s.peak) {
+        for (int val : sequence)
+            if (val > s.peak)
                 s.peak = val;
-            }
-        }
         collatzStatsMap[startVal] = s;
     }
 
     // Reset animation state
-    currentBranch  = 1;
-    currentIndex   = 0;
-    animationDone  = false;
-    branchesDone   = 0;
-    sumOfSteps     = 0;
-    maxSteps       = 0;
+    currentBranch = 1;
+    currentIndex = 0;
+    animationDone = false;
+    branchesDone = 0;
+    sumOfSteps = 0;
+    maxSteps = 0;
     overallMaxPeak = 1;
 
     glutPostRedisplay();
 }
 
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 // TIMER callback
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 void timer(int) {
-    // Don't animate if we're prompting the user for new input
+    // Don't animate if we're prompting the user for new input.
     if (!animationDone && !animationPause && !promptForNewMaxN) {
-        auto it = collatzTree.find(currentBranch);
-        if (it != collatzTree.end()) {
+        auto it = collatzBranches.find(currentBranch);
+        if (it != collatzBranches.end()) {
             const auto &values = it->second;
             currentIndex++;
             if (currentIndex >= (int)values.size()) {
-                // Finished this branch
                 branchesDone++;
 
                 // Update overall stats
@@ -437,16 +421,14 @@ void timer(int) {
                 // Move to next
                 currentIndex = 0;
                 currentBranch++;
-                if (currentBranch > maxN) {
+                if (currentBranch > maxN)
                     animationDone = true;
-                }
             }
         } else {
             // If no data for this branch, skip it
             currentBranch++;
-            if (currentBranch > maxN) {
+            if (currentBranch > maxN)
                 animationDone = true;
-            }
         }
     }
 
@@ -454,9 +436,9 @@ void timer(int) {
     glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
 }
 
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 // KEYBOARD callback
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 void keyboard(unsigned char key, int, int)
 {
     // If we are currently prompting for a new maxN:
@@ -469,12 +451,9 @@ void keyboard(unsigned char key, int, int)
                 errorMessage.clear();
                 glutPostRedisplay();
                 return;
-
-                // Enter/Return
-            case '\r':
-            case '\n':
+            case '\r': // Return
+            case '\n': // Enter
             {
-                // Attempt to parse input
                 if (inputBuffer.empty()) {
                     // If empty, show an error message, remain in prompt mode
                     errorMessage = "Please enter a number (1..1000).";
@@ -484,7 +463,6 @@ void keyboard(unsigned char key, int, int)
 
                 int newValue = std::stoi(inputBuffer); // we only allow digits
                 if (newValue < 1 || newValue > 1000) {
-                    // Out of range
                     errorMessage = "Value out of range [1..1000]. Try again.";
                     glutPostRedisplay();
                     return;
@@ -499,30 +477,24 @@ void keyboard(unsigned char key, int, int)
                 glutPostRedisplay();
                 return;
             }
-
-                // Backspace can be ASCII 8 or 127, depending on environment
-            case 8:
+            case 8: // Backspace (environment-dependent)
             case 127:
             {
-                if (!inputBuffer.empty()) {
+                if (!inputBuffer.empty())
                     inputBuffer.pop_back();
-                }
                 glutPostRedisplay();
                 return;
             }
-
             default:
                 // If digit, append to buffer
                 if (key >= '0' && key <= '9') {
-                    inputBuffer.push_back(key);
+                    inputBuffer.push_back((char) key);
                     glutPostRedisplay();
                 }
-                // else ignore
                 return;
         }
     }
     else {
-        // Normal mode (not prompting for input)
         switch (key) {
             case 27: // Escape
                 exit(0);
@@ -533,8 +505,8 @@ void keyboard(unsigned char key, int, int)
             case '+':
                 ANIMATION_DELAY_MS = std::max(0, ANIMATION_DELAY_MS - 5);
                 break;
-            case '-':
-                ANIMATION_DELAY_MS = std::min(60, ANIMATION_DELAY_MS + 5);
+            case '_':
+                ANIMATION_DELAY_MS = std::min(100, ANIMATION_DELAY_MS + 5);
                 break;
             case 'l':
             case 'L':
@@ -542,11 +514,11 @@ void keyboard(unsigned char key, int, int)
                 break;
             case 'r':
             case 'R':
-                // Clear screen & prompt for new maxN
-                collatzTree.clear();
+                // Clear screen & prompt for new max number.
+                collatzBranches.clear();
                 collatzStatsMap.clear();
-                animationDone   = true;  // stop current animation
-                promptForNewMaxN = true; // start prompting user
+                animationDone = true;
+                promptForNewMaxN = true;
                 inputBuffer.clear();
                 errorMessage.clear();
                 glutPostRedisplay();
@@ -559,13 +531,12 @@ void keyboard(unsigned char key, int, int)
                 break;
         }
     }
-
     glutPostRedisplay();
 }
 
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 // Initialization
-// ------------------------------------------------------------------
+// -------------------------------------------------------------
 void initOpenGL() {
     glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
 
@@ -576,17 +547,16 @@ void initOpenGL() {
 }
 
 int main(int argc, char** argv) {
-    // Set an initial maxN = 10
     maxN = 10;
 
     // Compute Collatz for initial maxN
     collatz.computeCollatz(maxN);
-    collatzTree = collatz.getCollatzTree();
+    collatzBranches = collatz.getCollatzBranches();
     computeAxisLimits();
 
     // Populate stats
     collatzStatsMap.clear();
-    for (const auto &pair : collatzTree) {
+    for (const auto &pair : collatzBranches) {
         int startVal = pair.first;
         const auto &sequence = pair.second;
 

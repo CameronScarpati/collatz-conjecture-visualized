@@ -23,11 +23,6 @@ private:
     std::unordered_map<int, std::vector<int>> collatzTree;
 
     /**
-     * @brief A set of all unique numbers encountered in all computed sequences.
-     */
-    std::unordered_set<int> allNodes;
-
-    /**
      * @brief The highest number up to which Collatz sequences have been computed.
      */
     int maxComputed = 0;
@@ -67,13 +62,7 @@ public:
      * @brief Returns a read-only reference to the Collatz tree (map of all computed sequences).
      * @return A const reference to the Collatz tree.
      */
-    const std::unordered_map<int, std::vector<int>>& getCollatzTree() const;
-
-    /**
-     * @brief Returns a read-only reference to the set of all unique nodes encountered.
-     * @return A const reference to the set of all unique nodes.
-     */
-    const std::unordered_set<int>& getAllNodes() const;
+    const std::unordered_map<int, std::vector<int>>& getCollatzBranches() const;
 };
 
 #endif //CODING_PROJECTS_COLLATZ_CONJECTURE_H
