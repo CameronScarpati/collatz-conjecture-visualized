@@ -10,6 +10,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
 
 // -------------------------------------------------------------
 // Global variables & toggles
@@ -51,6 +52,7 @@ int branchesDone   = 0;
 // Option toggles
 bool useLogScale   = true;
 bool showHelp      = true;
+bool instantRender = false;
 
 // -------------------------------------------------------------
 // Prompt mode for entering a new maxN on-screen
@@ -87,24 +89,29 @@ void computeAxisLimits() {
     }
 }
 
+// ------------------------------------------------------------------
+// NEW: Adjust scaleX() so that the branch starting point (step 0)
+//      is attached exactly to the y-axis line (drawn at x = -1.08),
+//      and the last point maps to the right edge (x = 1.2).
+// ------------------------------------------------------------------
 float scaleX(int step) {
-    if (maxIterations == 0)
-        return 0.0f;
-    return ((float) step / maxIterations) * 2.0f - 1.0f;
+    // If there is only one point, return the y-axis line.
+    if (maxIterations <= 1)
+        return -1.08f;
+    // Compute the available width from x = -1.08 to x = 1.2 (width = 2.28)
+    float graphWidth = 1.2f - (-1.08f); // equals 2.28
+    return -1.08f + ((float)step / ((float)maxIterations - 1.0f)) * graphWidth;
 }
 
 float scaleY(int value) {
-    // Always pin value <= 1 to the bottom.
     if (value <= 1)
-        return -1.0f;
+        return -1.0f; // Ensure '1' is pinned at the bottom
 
     if (useLogScale) {
-        // Normal log-scale formula
         float ratio = std::log2((float)value) / std::log2(maxValue);
-        return ratio * 2.0f - 1.0f;
-    }
-    else
-        return (static_cast<float>(value) / maxValue) * 2.0f - 1.0f;
+        return (ratio * 2.0f) - 1.0f;
+    } else
+        return ((float)value / maxValue) * 2.0f - 1.0f;
 }
 
 void hsvToRgb(float H, float S, float V, float &r, float &g, float &b) {
@@ -129,11 +136,7 @@ void getRainbowColor(int step, float &r, float &g, float &b) {
     float ratio = 0.0f;
     if (maxIterations > 1.0f)
         ratio = (static_cast<float>(step) / (maxIterations - 1.0f));
-    if (ratio < 0.0f)
-        ratio = 0.0f;
-    if (ratio > 1.0f)
-        ratio = 1.0f;
-
+    ratio = std::min(std::max(ratio, 0.0f), 1.0f);
     float hue = 300.0f * ratio;
     hsvToRgb(hue, 1.0f, 1.0f, r, g, b);
 }
@@ -163,6 +166,7 @@ void drawHelpMenu() {
     drawLine("L   = Toggle log-scale vs. linear-scale");
     drawLine("R   = Clear screen & prompt for new maxN");
     drawLine("H   = Toggle this help menu");
+    drawLine("I   = Toggle instant render mode");
 }
 
 void drawAxes() {
@@ -172,59 +176,29 @@ void drawAxes() {
     // X-axis
     glBegin(GL_LINES);
     glVertex2f(-1.2f, -1.0f);
-    glVertex2f( 1.2f, -1.0f);
+    glVertex2f(1.2f, -1.0f);
     glEnd();
 
     // Y-axis
     glBegin(GL_LINES);
-    glVertex2f(-1.0f, -1.2f);
-    glVertex2f(-1.0f,  1.2f);
+    glVertex2f(-1.08f, -1.1f);
+    glVertex2f(-1.08f, 1.2f);
     glEnd();
 
-    // X-axis arrow
-    glBegin(GL_TRIANGLES);
-    glVertex2f(1.2f,  -1.0f);
-    glVertex2f(1.15f, -0.97f);
-    glVertex2f(1.15f, -1.03f);
-    glEnd();
-
-    // Y-axis arrow
-    glBegin(GL_TRIANGLES);
-    glVertex2f(-1.0f,  1.2f);
-    glVertex2f(-1.03f, 1.15f);
-    glVertex2f(-0.97f, 1.15f);
-    glEnd();
-
-    // X-axis labels
-    if (maxIterations > 0) {
-        int stepInterval = std::max(5, (int)maxIterations / 10);
-        for (int i = 0; i <= (int)maxIterations; i += stepInterval) {
-            float xPos = scaleX(i);
-            drawText(xPos, -1.05f, std::to_string(i));
-        }
-    }
-
-    // Y-axis labels
     if (useLogScale) {
-        // powers of 2
         for (int val = 1; val <= (int)maxValue; val *= 2) {
             float yPos = scaleY(val);
-            drawText(-1.08f, yPos, std::to_string(val));
+            drawText(-1.195f, yPos + 0.06f, std::to_string(val));
         }
     } else {
-        // linear intervalues
         if (maxValue >= 1.0f) {
             int increment = std::max(1, (int)maxValue / 8);
             for (int val = 0; val <= (int)maxValue; val += increment) {
                 float yPos = scaleY(val);
-                drawText(-1.08f, yPos, std::to_string(val));
+                drawText(-1.195f, yPos + 0.06f, std::to_string(val));
             }
         }
     }
-
-    // Axis descriptions
-    drawText(1.25f, -1.02f, "Steps");
-    drawText(-1.05f, 1.25f,  "Value");
 }
 
 void drawIncrementalCollatzGraph() {
@@ -354,13 +328,16 @@ void display() {
     // NEW: Draw the animation delay & scale info near the bottom
     // -----------------------------------------------------------------
     glColor3f(1.0f, 1.0f, 1.0f);
-    // For example, place them at x=-1.15, y ~ -1.10 and -1.15, so it doesn't overlap the axis
-    drawText(-0.2f, -1.10f,
+    drawText(-0.7f, -1.10f,
              "Current animation delay: " + std::to_string(ANIMATION_DELAY_MS) + " ms");
-    drawText(-0.2f, -1.15f,
+    drawText(-0.7f, -1.15f,
              std::string("Using ")
              + (useLogScale ? "log" : "linear")
              + "-scale for Y-axis.");
+    if (instantRender) {
+        glColor3f(1.0f, 0.5f, 0.0f);
+        drawText(-0.1f, -1.125f, "Instant Render Mode ON (Press 'I' to toggle)");
+    }
 
     glutSwapBuffers();
 }
@@ -370,9 +347,11 @@ void display() {
 // -------------------------------------------------------------
 void resetWithNewMaxN(int newN)
 {
+    // Make sure instant render is off so we animate the new input
+    instantRender = false;
     maxN = newN;
 
-    // Clear everything
+    // Clear everything and recompute the collatz sequences
     collatz = CollatzConjecture();
     collatz.computeCollatz(maxN);
     collatzBranches = collatz.getCollatzBranches();
@@ -403,6 +382,9 @@ void resetWithNewMaxN(int newN)
     maxSteps = 0;
     overallMaxPeak = 1;
 
+    // (Re)start the timer so that the animation begins immediately
+    glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
+
     glutPostRedisplay();
 }
 
@@ -410,8 +392,12 @@ void resetWithNewMaxN(int newN)
 // TIMER callback
 // -------------------------------------------------------------
 void timer(int) {
-    // Don't animate if we're prompting the user for new input.
-    if (!animationDone && !animationPause && !promptForNewMaxN) {
+    if (instantRender) {
+        // If instant rendering is enabled, complete animation immediately
+        animationDone = true;
+        currentBranch = maxN;
+        currentIndex = 0;
+    } else if (!animationDone && !animationPause && !promptForNewMaxN) {
         auto it = collatzBranches.find(currentBranch);
         if (it != collatzBranches.end()) {
             const auto &values = it->second;
@@ -422,21 +408,17 @@ void timer(int) {
                 // Update overall stats
                 auto st = collatzStatsMap[currentBranch];
                 sumOfSteps += st.steps;
-                if (st.steps > maxSteps) {
+                if (st.steps > maxSteps)
                     maxSteps = st.steps;
-                }
-                if (st.peak > overallMaxPeak) {
+                if (st.peak > overallMaxPeak)
                     overallMaxPeak = st.peak;
-                }
 
-                // Move to next
                 currentIndex = 0;
                 currentBranch++;
                 if (currentBranch > maxN)
                     animationDone = true;
             }
         } else {
-            // If no data for this branch, skip it
             currentBranch++;
             if (currentBranch > maxN)
                 animationDone = true;
@@ -444,7 +426,9 @@ void timer(int) {
     }
 
     glutPostRedisplay();
-    glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
+    if (!instantRender) {
+        glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
+    }
 }
 
 // -------------------------------------------------------------
@@ -479,7 +463,8 @@ void keyboard(unsigned char key, int, int)
                     return;
                 }
 
-                // Valid input, reset and exit prompt mode
+                // Turn off instant render and reset
+                instantRender = false;
                 errorMessage.clear();
                 promptForNewMaxN = false;
                 resetWithNewMaxN(newValue);
@@ -526,6 +511,7 @@ void keyboard(unsigned char key, int, int)
             case 'r':
             case 'R':
                 // Clear screen & prompt for new max number.
+                instantRender = false;
                 collatzBranches.clear();
                 collatzStatsMap.clear();
                 animationDone = true;
@@ -537,6 +523,22 @@ void keyboard(unsigned char key, int, int)
             case 'h':
             case 'H':
                 showHelp = !showHelp;
+                break;
+            case 'i':
+            case 'I':
+                instantRender = !instantRender;
+                if (instantRender) {
+                    animationDone = true;
+                    currentBranch = maxN;
+                    currentIndex = 0;
+                } else {
+                    animationDone = false;
+                    currentBranch = 1;
+                    currentIndex = 0;
+                    // (Re)start the timer if we are turning off instant render
+                    glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
+                }
+                glutPostRedisplay();
                 break;
             default:
                 break;
