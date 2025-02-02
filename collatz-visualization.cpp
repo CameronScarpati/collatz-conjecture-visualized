@@ -1,4 +1,3 @@
-#define GL_SILENCE_DEPRECATION
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
@@ -44,10 +43,6 @@ struct CollatzStats {
 };
 
 std::unordered_map<int, CollatzStats> collatzStatsMap;
-int overallMaxPeak = 1;
-int sumOfSteps     = 0;
-int maxSteps       = 0;
-int branchesDone   = 0;
 
 // Option toggles
 bool useLogScale   = true;
@@ -303,14 +298,14 @@ void display() {
     }
 
     // Overall stats
-    float avgSteps = (branchesDone > 0)
-                     ? (float)sumOfSteps / (float)branchesDone
+    const auto& overallStats = collatz.getOverallStats(maxN);
+    float avgSteps = (overallStats.branchesDone > 0)
+                     ? (float)overallStats.sumOfSteps / (float) overallStats.branchesDone
                      : 0.0f;
-
     glColor3f(0.0f, 1.0f, 0.0f);
-    std::string msgOverall = "Branches Done=" + std::to_string(branchesDone)
-                             + " | MaxSteps=" + std::to_string(maxSteps)
-                             + " | OverallPeak=" + std::to_string(overallMaxPeak)
+    std::string msgOverall = "Branches Done=" + std::to_string(overallStats.branchesDone)
+                             + " | MaxSteps=" + std::to_string(overallStats.maxSteps)
+                             + " | OverallPeak=" + std::to_string(overallStats.overallMaxPeak)
                              + " | AvgSteps=" + std::to_string((int)avgSteps);
     drawText(-0.975f, 1.04f, msgOverall);
 
@@ -347,7 +342,7 @@ void display() {
 // -------------------------------------------------------------
 void resetWithNewMaxN(int newN)
 {
-    // Make sure instant render is off so we animate the new input
+    // Make sure instant render is off, so we animate the new input
     instantRender = false;
     maxN = newN;
 
@@ -377,10 +372,6 @@ void resetWithNewMaxN(int newN)
     currentBranch = 1;
     currentIndex = 0;
     animationDone = false;
-    branchesDone = 0;
-    sumOfSteps = 0;
-    maxSteps = 0;
-    overallMaxPeak = 1;
 
     // (Re)start the timer so that the animation begins immediately
     glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
@@ -395,7 +386,7 @@ void timer(int) {
     if (instantRender) {
         // If instant rendering is enabled, complete animation immediately
         animationDone = true;
-        currentBranch = maxN;
+        currentBranch = maxN + 1;
         currentIndex = 0;
     } else if (!animationDone && !animationPause && !promptForNewMaxN) {
         auto it = collatzBranches.find(currentBranch);
@@ -403,16 +394,6 @@ void timer(int) {
             const auto &values = it->second;
             currentIndex++;
             if (currentIndex >= (int)values.size()) {
-                branchesDone++;
-
-                // Update overall stats
-                auto st = collatzStatsMap[currentBranch];
-                sumOfSteps += st.steps;
-                if (st.steps > maxSteps)
-                    maxSteps = st.steps;
-                if (st.peak > overallMaxPeak)
-                    overallMaxPeak = st.peak;
-
                 currentIndex = 0;
                 currentBranch++;
                 if (currentBranch > maxN)
@@ -529,14 +510,8 @@ void keyboard(unsigned char key, int, int)
                 instantRender = !instantRender;
 
                 if (instantRender) {
-                    // When turning instant render ON, reset overall branch info:
-                    branchesDone = 0;
-                    sumOfSteps    = 0;
-                    maxSteps      = 0;
-                    overallMaxPeak = 1;
-
                     animationDone = true;
-                    currentBranch = maxN;
+                    currentBranch = maxN + 1;
                     currentIndex  = 0;
                 } else {
                     animationDone = false;
