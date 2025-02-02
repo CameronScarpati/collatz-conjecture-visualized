@@ -527,15 +527,21 @@ void keyboard(unsigned char key, int, int)
             case 'i':
             case 'I':
                 instantRender = !instantRender;
+
                 if (instantRender) {
+                    // When turning instant render ON, reset overall branch info:
+                    branchesDone = 0;
+                    sumOfSteps    = 0;
+                    maxSteps      = 0;
+                    overallMaxPeak = 1;
+
                     animationDone = true;
                     currentBranch = maxN;
-                    currentIndex = 0;
+                    currentIndex  = 0;
                 } else {
                     animationDone = false;
                     currentBranch = 1;
-                    currentIndex = 0;
-                    // (Re)start the timer if we are turning off instant render
+                    currentIndex  = 0;
                     glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
                 }
                 glutPostRedisplay();
