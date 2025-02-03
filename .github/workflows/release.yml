@@ -1,0 +1,102 @@
+name: Build and Release Multi-Platform
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # -----------------------------
+      # Build step for Windows
+      # -----------------------------
+      - name: Build executable on Windows
+        if: runner.os == 'Windows'
+        run: |
+          REM Use g++ (installed with e.g. mingw) to build for Windows.
+          g++ -O2 -static -o collatz-visualization.exe collatz-visualization.cpp collatz_modes.cpp
+        shell: cmd
+
+      # -----------------------------
+      # Build step for macOS
+      # -----------------------------
+      - name: Build executable on macOS
+        if: runner.os == 'macOS'
+        run: |
+          clang++ -O2 -o collatz-visualization-macos collatz-visualization.cpp collatz_modes.cpp -framework GLUT -framework OpenGL
+        shell: bash
+
+      # -----------------------------
+      # Build step for Linux
+      # -----------------------------
+      - name: Build executable on Linux
+        if: runner.os == 'Linux'
+        run: |
+          g++ -O2 -o collatz-visualization-linux collatz-visualization.cpp collatz_modes.cpp -lGL -lglut
+        shell: bash
+
+      # -----------------------------
+      # Upload artifacts
+      # -----------------------------
+      - name: Upload Windows artifact
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v3
+        with:
+          name: collatz-windows
+          path: collatz-visualization.exe
+
+      - name: Upload macOS artifact
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v3
+        with:
+          name: collatz-macos
+          path: collatz-visualization-macos
+
+      - name: Upload Linux artifact
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v3
+        with:
+          name: collatz-linux
+          path: collatz-visualization-linux
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: collatz-windows
+          path: artifacts/windows
+
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: collatz-macos
+          path: artifacts/macos
+
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: collatz-linux
+          path: artifacts/linux
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v1.0.${{ github.run_number }}
+          release_name: Release v1.0.${{ github.run_number }}
+          draft: false
+          prerelease: false
+          artifacts: |
+            artifacts/windows/collatz-visualization.exe
+            artifacts/macos/collatz-visualization-macos
+            artifacts/linux/collatz-visualization-linux
