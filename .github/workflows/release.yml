@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # -----------------------------
       # Build step for Windows
@@ -48,21 +48,21 @@ jobs:
       # -----------------------------
       - name: Upload Windows artifact
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: collatz-windows
           path: collatz-visualization.exe
 
       - name: Upload macOS artifact
         if: runner.os == 'macOS'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: collatz-macos
           path: collatz-visualization-macos
 
       - name: Upload Linux artifact
         if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: collatz-linux
           path: collatz-visualization-linux
@@ -72,19 +72,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download Windows artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: collatz-windows
           path: artifacts/windows
 
       - name: Download macOS artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: collatz-macos
           path: artifacts/macos
 
       - name: Download Linux artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: collatz-linux
           path: artifacts/linux

@@ -159,3 +159,18 @@ Project Link: [https://github.com/CameronScarpati/collatz-conjecture-visualized]
 * FreeGLUT for cross-platform support
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/CameronScarpati/collatz-conjecture-visualized.svg?style=for-the-badge
+[contributors-url]: https://github.com/CameronScarpati/collatz-conjecture-visualized/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/CameronScarpati/collatz-conjecture-visualized.svg?style=for-the-badge
+[forks-url]: https://github.com/CameronScarpati/collatz-conjecture-visualized/network/members
+[stars-shield]: https://img.shields.io/github/stars/CameronScarpati/collatz-conjecture-visualized.svg?style=for-the-badge
+[stars-url]: https://github.com/CameronScarpati/collatz-conjecture-visualized/stargazers
+[issues-shield]: https://img.shields.io/github/issues/CameronScarpati/collatz-conjecture-visualized.svg?style=for-the-badge
+[issues-url]: https://github.com/CameronScarpati/collatz-conjecture-visualized/issues
+[license-shield]: https://img.shields.io/github/license/CameronScarpati/collatz-conjecture-visualized.svg?style=for-the-badge
+[license-url]: https://github.com/CameronScarpati/collatz-conjecture-visualized/blob/master/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/cameron-scarpati
