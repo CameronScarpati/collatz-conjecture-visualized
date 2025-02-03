@@ -1,1 +1,11 @@
+# Ignore collatz Executable
 collatz
+
+# Ignore build directories
+cmake-build-debug/
+
+# Ignore JetBrains IDE config (adjust if you need to share some settings)
+.idea/
+
+# Ignore macOS metadata files
+.DS_Store
