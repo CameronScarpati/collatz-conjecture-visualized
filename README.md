@@ -25,13 +25,23 @@
   </p>
 </div>
 
-## About The Project
+![Collatz Conjecture - Linear Scale (10 Branches)](images/Collatz-Linear-Scale-10-Branches.png)
+This visualization shows the Collatz sequences for 10 different starting numbers using a linear scale.
 
-![Collatz Conjecture Visualization](images/Collatz%20Conjecture%20Linear%20Scale%20(10%20Branches).png)
+![Collatz Conjecture - Linear Scale (1000 Branches)](images/Collatz-Linear-Scale-1000-Branches.png)
+This visualization extends the linear scale view to 1000 different starting numbers, revealing more structural patterns.
 
-This project provides an interactive visualization of the Collatz Conjecture. It computes and animates the sequences of numbers using OpenGL and allows users to explore how different numbers evolve according to the Collatz formula.
+![Collatz Conjecture - Log Scale (10 Branches)](images/Collatz-Log-Scale-10-Branches.png)
+This log-scale visualization maps the trajectories of 10 numbers under the Collatz sequence, emphasizing relative growth differences.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+![Collatz Conjecture - Log Scale (1000 Branches)](images/Collatz-Log-Scale-1000-Branches.png)
+With 1000 branches in a log scale, this visualization highlights how sequences distribute over a broader range.
+
+![Collatz Change - MaxN](images/Collatz-Change-MaxN.png)
+This image likely represents a visualization where the maximum N value (number of iterations or numbers considered) is changed.
+
+![Collatz Change - MaxN Error](images/Collatz-Change-MaxN-Error.png)
+This image may depict an error or anomaly encountered when modifying the maximum N value.
 
 ### Built With
 
