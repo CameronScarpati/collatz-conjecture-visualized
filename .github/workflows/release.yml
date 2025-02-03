@@ -20,11 +20,11 @@ jobs:
       # -----------------------------
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt update && sudo apt install -y freeglut3-dev libglew-dev
+        run: sudo apt update && sudo apt install -y freeglut3-dev libglew-dev libglu1-mesa-dev
 
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
-        run: choco install -y mingw
+        run: choco install -y mingw --no-progress
 
       # -----------------------------
       # Build step for Windows
@@ -49,7 +49,7 @@ jobs:
       - name: Build executable on Linux
         if: runner.os == 'Linux'
         run: |
-          g++ -O2 -std=c++17 -o collatz-visualization-linux collatz-visualization.cpp collatz_modes.cpp -lGL -lglut
+          g++ -O2 -std=c++17 -o collatz-visualization-linux collatz-visualization.cpp collatz_modes.cpp -lGL -lGLU -lglut
         shell: bash
 
       # -----------------------------
