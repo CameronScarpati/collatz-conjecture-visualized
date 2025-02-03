@@ -24,21 +24,27 @@ jobs:
 
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
+        shell: powershell
         run: |
           choco install -y mingw --no-progress
-          Invoke-WebRequest -Uri "https://downloads.sourceforge.net/project/freeglut/freeglut/3.2.2/freeglut-3.2.2.MinGW.zip" -OutFile "freeglut.zip"
+          $MINGW_PATH="C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
+          echo "Adding MinGW to PATH: $MINGW_PATH"
+          echo "$MINGW_PATH" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+          refreshenv
+          Invoke-WebRequest -Uri "https://www.transmissionzero.co.uk/files/software/development/GLUT/freeglut-MinGW.zip" -OutFile "freeglut.zip"
           Expand-Archive -Path freeglut.zip -DestinationPath C:\freeglut
-          echo "C:\freeglut\lib" >> $GITHUB_PATH
-          echo "C:\freeglut\include" >> $GITHUB_PATH
-          echo "C:\tools\mingw64\bin" >> $GITHUB_PATH
+          echo "C:\freeglut\lib" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+          echo "C:\freeglut\include" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+          refreshenv
 
       # -----------------------------
       # Build step for Windows
       # -----------------------------
       - name: Build executable on Windows
         if: runner.os == 'Windows'
-        run: g++ -O2 -static -std=c++17 -o collatz-visualization.exe collatz-visualization.cpp collatz_modes.cpp -I C:\freeglut\include -L C:\freeglut\lib -lfreeglut -lopengl32 -lglu32
         shell: cmd
+        run: |
+          g++ -O2 -static -std=c++17 -o collatz-visualization.exe collatz-visualization.cpp collatz_modes.cpp -I C:\freeglut\include -L C:\freeglut\lib -lfreeglut -lopengl32 -lglu32
 
       # -----------------------------
       # Build step for macOS
