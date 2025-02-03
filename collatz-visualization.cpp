@@ -45,7 +45,7 @@ struct CollatzStats {
 std::unordered_map<int, CollatzStats> collatzStatsMap;
 
 // Option toggles
-bool useLogScale   = true;
+bool useLogScale   = false;
 bool showHelp      = true;
 bool instantRender = false;
 
