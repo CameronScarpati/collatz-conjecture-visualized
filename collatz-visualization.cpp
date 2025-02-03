@@ -697,7 +697,7 @@ int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-    glutCreateWindow("Collatz Conjecture Chart Animation");
+    glutCreateWindow("Collatz Conjecture Visualization");
 
     initOpenGL();
     glutDisplayFunc(display);

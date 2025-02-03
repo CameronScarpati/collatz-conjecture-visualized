@@ -1,5 +1,5 @@
 # Ignore collatz Executable
-collatz
+Collatz-Conjecture-Visualization
 
 # Ignore build directories
 cmake-build-debug/
