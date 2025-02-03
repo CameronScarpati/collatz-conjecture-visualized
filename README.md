@@ -90,6 +90,7 @@ Keybindings:
 - **L**: Toggle log-scale vs. linear-scale
 - **R**: Clear screen & enter new maxN
 - **H**: Toggle help menu
+- **I**: Toggle instant render mode
 
 _For more details, refer to the [Documentation](https://example.com)_
 
@@ -97,10 +98,8 @@ _For more details, refer to the [Documentation](https://example.com)_
 
 ## Roadmap
 
-- [ ] Add GUI controls for easier parameter adjustments
-- [ ] Implement real-time statistics display
-- [ ] Support higher resolution rendering
-- [ ] Export data for deeper analysis
+- [ ] Add GUI controls for single/chosen collatz graph visualization.
+- [ ] Allow for larger numbers to be calculated (+1000)
 
 See the [open issues](https://github.com/CameronScarpati/collatz-conjecture-visualized/issues) for a full list of proposed features and known issues.
 
