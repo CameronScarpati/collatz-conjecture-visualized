@@ -1,6 +1,0 @@
-/Applications/CLion.app/Contents/bin/cmake/mac/aarch64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/Applications/CLion.app/Contents/bin/ninja/mac/aarch64/ninja -G Ninja -S "/Users/stevenscarpati/Documents/Home/Coding Projects" -B "/Users/stevenscarpati/Documents/Home/Coding Projects/cmake-build-debug"
--- Found OpenGL: /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/System/Library/Frameworks/OpenGL.framework   
--- Found GLUT: /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/System/Library/Frameworks/GLUT.framework  
--- Configuring done (0.3s)
--- Generating done (0.0s)
--- Build files have been written to: /Users/stevenscarpati/Documents/Home/Coding Projects/cmake-build-debug
