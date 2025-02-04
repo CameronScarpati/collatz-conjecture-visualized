@@ -86,4 +86,4 @@ jobs:
           artifacts: |
             artifacts/macos/collatz-visualization-macos
             artifacts/linux/collatz-visualization-linux
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GITHUB_TOKEN }}
