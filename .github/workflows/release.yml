@@ -9,7 +9,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]  # Removed Windows
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
@@ -21,30 +21,6 @@ jobs:
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
         run: sudo apt update && sudo apt install -y freeglut3-dev libglew-dev libglu1-mesa-dev
-
-      - name: Install dependencies (Windows)
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: |
-          choco install -y mingw --no-progress
-          $MINGW_PATH="C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin"
-          echo "Adding MinGW to PATH: $MINGW_PATH"
-          echo "$MINGW_PATH" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
-          refreshenv
-          Invoke-WebRequest -Uri "https://www.transmissionzero.co.uk/files/software/development/GLUT/freeglut-MinGW.zip" -OutFile "freeglut.zip"
-          Expand-Archive -Path freeglut.zip -DestinationPath C:\freeglut
-          echo "C:\freeglut\lib" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
-          echo "C:\freeglut\include" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
-          refreshenv
-
-      # -----------------------------
-      # Build step for Windows
-      # -----------------------------
-      - name: Build executable on Windows
-        if: runner.os == 'Windows'
-        shell: cmd
-        run: |
-          g++ -O2 -static -std=c++17 -o collatz-visualization.exe collatz-visualization.cpp collatz_modes.cpp -I C:\freeglut\include -L C:\freeglut\lib -lfreeglut -lopengl32 -lglu32
 
       # -----------------------------
       # Build step for macOS
@@ -67,13 +43,6 @@ jobs:
       # -----------------------------
       # Upload artifacts
       # -----------------------------
-      - name: Upload Windows artifact
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: collatz-windows
-          path: collatz-visualization.exe
-
       - name: Upload macOS artifact
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
@@ -92,12 +61,6 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Download Windows artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: collatz-windows
-          path: artifacts/windows
-
       - name: Download macOS artifact
         uses: actions/download-artifact@v4
         with:
@@ -118,6 +81,5 @@ jobs:
           draft: false
           prerelease: false
           artifacts: |
-            artifacts/windows/collatz-visualization.exe
             artifacts/macos/collatz-visualization-macos
             artifacts/linux/collatz-visualization-linux
