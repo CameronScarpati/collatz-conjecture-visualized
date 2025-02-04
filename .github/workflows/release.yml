@@ -9,7 +9,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, ubuntu-latest]  # Removed Windows
+        os: [macos-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
@@ -77,9 +77,10 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: v1.0.${{ github.run_number }}
-          release_name: Release v1.0.${{ github.run_number }}
+          name: Release v1.0.${{ github.run_number }}
           draft: false
           prerelease: false
           artifacts: |
             artifacts/macos/collatz-visualization-macos
             artifacts/linux/collatz-visualization-linux
+          token: ${{ secrets.GH_PAT }}
