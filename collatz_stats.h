@@ -3,16 +3,16 @@
 
 // Statistics for one branch.
 struct CollatzBranchStats {
-    unsigned long long steps;       // (sequence length minus one)
-    unsigned long long branchPeak;  // maximum value reached in the branch
+  unsigned long long steps;      // (sequence length minus one)
+  unsigned long long branchPeak; // maximum value reached in the branch
 };
 
 // Overall (aggregated) statistics.
 struct CollatzOverallStats {
-    unsigned long long branchesDone;
-    unsigned long long sumOfSteps;
-    unsigned long long maxSteps;
-    unsigned long long overallMaxPeak;
+  unsigned long long branchesDone;
+  unsigned long long sumOfSteps;
+  unsigned long long maxSteps;
+  unsigned long long overallMaxPeak;
 };
 
 #endif // COLLATZ_STATS_H
