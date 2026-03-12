@@ -1,4 +1,8 @@
+#ifdef __APPLE__
 #include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
 
 #include "collatz_engine.h"
 #include "collatz_modes.h"
@@ -13,54 +17,86 @@
 #include <vector>
 
 // -------------------------------------------------------------
-// Global variables & toggles
+// Constants
 // -------------------------------------------------------------
 
-// Our core engine instance.
+static constexpr int WINDOW_WIDTH = 1200;
+static constexpr int WINDOW_HEIGHT = 800;
+
+static constexpr float GRAPH_WIDTH = 2.28f;
+static constexpr float DEFAULT_AXIS_X = -1.1f;
+static constexpr float AXIS_DIGIT_OFFSET = 0.013f;
+static constexpr float AXIS_LABEL_X = -1.19f;
+
+static constexpr float GLOW_LINE_WIDTH = 8.0f;
+static constexpr float BRIGHT_LINE_WIDTH = 5.0f;
+static constexpr float DEFAULT_LINE_WIDTH = 2.0f;
+static constexpr float BRIGHTNESS_BOOST = 1.2f;
+static constexpr float GLOW_ALPHA = 0.3f;
+
+static constexpr float BG_R = 0.05f;
+static constexpr float BG_G = 0.05f;
+static constexpr float BG_B = 0.1f;
+
+static constexpr int DEFAULT_ANIMATION_DELAY_MS = 50;
+static constexpr int ANIMATION_DELAY_STEP = 5;
+static constexpr int MAX_ANIMATION_DELAY_MS = 100;
+static constexpr int MIN_ANIMATION_DELAY_MS = 0;
+
+static constexpr unsigned long long MAX_BULK_N = 40000;
+static constexpr unsigned long long MAX_SELECTIVE_N = 500000;
+static constexpr unsigned long long DEFAULT_N = 10;
+
+// -------------------------------------------------------------
+// Global state
+// -------------------------------------------------------------
+
 CollatzEngine engine;
 
-// Global maps for branches and per–branch statistics.
 std::unordered_map<unsigned long long, std::vector<unsigned long long>>
     collatzBranches;
 std::unordered_map<unsigned long long, CollatzBranchStats> collatzStatsMap;
 
-// Axis placement for the y-axis (default)
-float verticalAxisPlacement = -1.1f;
-
-// In bulk mode, maxN is the highest branch number computed.
-// In selective mode, we ignore maxN and use the vector selectedBranches.
-unsigned long long maxN = 0;
-std::vector<unsigned long long> selectedBranches;
-
-// Window size
-const int WINDOW_WIDTH = 1200;
-const int WINDOW_HEIGHT = 800;
-
-// Axis scaling
+float verticalAxisPlacement = DEFAULT_AXIS_X;
 float maxIterations = 0.0f;
 float maxValue = 1.0f;
 
-// Animation control
-unsigned long long currentBranch =
-    1; // In selective mode, this is an index into selectedBranches.
+unsigned long long maxN = 0;
+std::vector<unsigned long long> selectedBranches;
+
+unsigned long long currentBranch = 1;
 unsigned long long currentIndex = 0;
 bool animationDone = false;
 bool animationPause = false;
-int ANIMATION_DELAY_MS = 50;
+int animationDelayMs = DEFAULT_ANIMATION_DELAY_MS;
 
-// Option toggles
 bool useYLogScale = false;
 bool showHelp = true;
 bool instantRender = false;
 bool selectBranches = false;
 
-// Prompt mode for new input
 bool promptForNewMaxN = false;
 std::string inputBuffer;
 std::string errorMessage;
 
 // -------------------------------------------------------------
-// Utility & drawing functions (each kept short and with nesting ≤ 2)
+// Helpers
+// -------------------------------------------------------------
+
+void buildBranchStatsMap() {
+  collatzStatsMap.clear();
+  for (const auto &pair : collatzBranches) {
+    CollatzBranchStats s{};
+    s.steps = pair.second.size() - 1;
+    s.branchPeak = 0;
+    for (unsigned long long val : pair.second)
+      s.branchPeak = std::max(s.branchPeak, val);
+    collatzStatsMap[pair.first] = s;
+  }
+}
+
+// -------------------------------------------------------------
+// Drawing functions
 // -------------------------------------------------------------
 
 void computeAxisLimits() {
@@ -79,13 +115,13 @@ void computeAxisLimits() {
                      ? static_cast<int>(std::floor(std::log10(maxValue)))
                      : 0;
   verticalAxisPlacement =
-      (exponent > 0) ? -1.1f + (float)exponent * 0.013f : -1.1f;
+      (exponent > 0) ? DEFAULT_AXIS_X + static_cast<float>(exponent) * AXIS_DIGIT_OFFSET : DEFAULT_AXIS_X;
 }
 
 float scaleX(int step) {
   if (maxIterations <= 1.0f)
     return verticalAxisPlacement;
-  float graphWidth = 2.28f;
+  float graphWidth = GRAPH_WIDTH;
   return verticalAxisPlacement +
          (static_cast<float>(step) / (maxIterations - 1.0f)) * graphWidth;
 }
@@ -184,14 +220,14 @@ void drawAxes() {
 
   if (useYLogScale) {
     for (int val = 1; val <= static_cast<int>(maxValue); val *= 2) {
-      drawText(-1.19f, scaleY(val) + 0.05f, std::to_string(val));
+      drawText(AXIS_LABEL_X, scaleY(val) + 0.05f, std::to_string(val));
     }
     return;
   }
   if (maxValue >= 1.0f) {
     int increment = std::max(1, static_cast<int>(maxValue) / 8);
     for (int val = 0; val <= static_cast<int>(maxValue); val += increment) {
-      drawText(-1.19f, scaleY(val) + 0.05f, std::to_string(val));
+      drawText(AXIS_LABEL_X, scaleY(val) + 0.05f, std::to_string(val));
     }
   }
 }
@@ -210,7 +246,7 @@ void drawFullBranch(const std::vector<unsigned long long> &values) {
 void drawAnimatedBranch(const std::vector<unsigned long long> &values,
                         unsigned long long branchIndex) {
   // Glow pass
-  glLineWidth(8.0f);
+  glLineWidth(GLOW_LINE_WIDTH);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glBegin(GL_LINE_STRIP);
@@ -218,26 +254,26 @@ void drawAnimatedBranch(const std::vector<unsigned long long> &values,
        i++) {
     float r, g, b;
     getRainbowColor(i, r, g, b);
-    glColor4f(r, g, b, 0.3f);
+    glColor4f(r, g, b, GLOW_ALPHA);
     glVertex2f(scaleX(i), scaleY(values[i]));
   }
   glEnd();
   glDisable(GL_BLEND);
   // Bright pass
-  glLineWidth(5.0f);
+  glLineWidth(BRIGHT_LINE_WIDTH);
   glBegin(GL_LINE_STRIP);
   for (int i = 0; i <= branchIndex && i < static_cast<int>(values.size());
        i++) {
     float r, g, b;
     getRainbowColor(i, r, g, b);
-    r = std::min(r * 1.2f, 1.0f);
-    g = std::min(g * 1.2f, 1.0f);
-    b = std::min(b * 1.2f, 1.0f);
+    r = std::min(r * BRIGHTNESS_BOOST, 1.0f);
+    g = std::min(g * BRIGHTNESS_BOOST, 1.0f);
+    b = std::min(b * BRIGHTNESS_BOOST, 1.0f);
     glColor3f(r, g, b);
     glVertex2f(scaleX(i), scaleY(values[i]));
   }
   glEnd();
-  glLineWidth(2.0f);
+  glLineWidth(DEFAULT_LINE_WIDTH);
 }
 
 void drawSelectiveCompletedBranches() {
@@ -317,7 +353,7 @@ void drawStatistics() {
   // Draw current branch info.
   if (!animationDone) {
     if (selectBranches && currentBranch < selectedBranches.size()) {
-      unsigned long long branchNum = currentBranch + 1;
+      unsigned long long branchNum = selectedBranches[currentBranch];
       const auto &stats = collatzStatsMap[branchNum];
       unsigned long long partialPeak =
           getPartialPeak(collatzBranches[branchNum], currentIndex);
@@ -387,7 +423,7 @@ void drawStatistics() {
 void drawBottomInfo() {
   glColor3f(1.0f, 1.0f, 1.0f);
   drawText(-0.7f, -1.10f,
-           "Current animation delay: " + std::to_string(ANIMATION_DELAY_MS) +
+           "Current animation delay: " + std::to_string(animationDelayMs) +
                " ms");
   drawText(-0.7f, -1.15f,
            std::string("Using ") + (useYLogScale ? "log" : "linear") +
@@ -455,7 +491,7 @@ void timer(int) {
   }
   glutPostRedisplay();
   if (!instantRender)
-    glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
+    glutTimerFunc(animationDelayMs, timer, 0);
 }
 
 // -------------------------------------------------------------
@@ -475,22 +511,13 @@ void resetWithNewMaxN(unsigned long long newN) {
     maxN = newN;
     auto result = computeBulkSequences(engine, maxN);
     collatzBranches = std::move(result.branches);
-    for (const auto &pair : collatzBranches) {
-      unsigned long long startVal = pair.first;
-      const auto &seq = pair.second;
-      CollatzBranchStats s{};
-      s.steps = seq.size() - 1;
-      s.branchPeak = 0;
-      for (unsigned long long val : seq)
-        s.branchPeak = std::max(s.branchPeak, val);
-      collatzStatsMap[startVal] = s;
-    }
+    buildBranchStatsMap();
     currentBranch = 1;
   }
   computeAxisLimits();
   currentIndex = 0;
   animationDone = false;
-  glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
+  glutTimerFunc(animationDelayMs, timer, 0);
   glutPostRedisplay();
 }
 
@@ -505,8 +532,8 @@ void processSelectiveInput() {
       continue;
     try {
       unsigned long long val = std::stoll(token);
-      if (val < 1 || val > 500000) {
-        errorMessage = "Branch numbers must be in [1..500000].";
+      if (val < 1 || val > MAX_SELECTIVE_N) {
+        errorMessage = "Branch numbers must be in [1.." + std::to_string(MAX_SELECTIVE_N) + "].";
         return;
       }
       branches.push_back(val);
@@ -531,8 +558,8 @@ void processSelectiveInput() {
 void processBulkInput() {
   try {
     int newValue = std::stoi(inputBuffer);
-    if (newValue < 1 || newValue > 40000) {
-      errorMessage = "Value out of range [1..40000]. Try again.";
+    if (newValue < 1 || newValue > static_cast<int>(MAX_BULK_N)) {
+      errorMessage = "Value out of range [1.." + std::to_string(MAX_BULK_N) + "]. Try again.";
       return;
     }
     instantRender = false;
@@ -553,11 +580,11 @@ void handlePromptKey(unsigned char key) {
     errorMessage.clear();
     if (selectBranches) {
       selectedBranches.clear();
-      for (int i = 1; i <= 10; i++)
+      for (unsigned long long i = 1; i <= DEFAULT_N; i++)
         selectedBranches.push_back(i);
       resetWithNewMaxN(selectedBranches.back());
     } else {
-      resetWithNewMaxN(10);
+      resetWithNewMaxN(DEFAULT_N);
     }
     selectBranches = false;
     break;
@@ -567,7 +594,7 @@ void handlePromptKey(unsigned char key) {
       errorMessage =
           selectBranches
               ? "Please enter at least one branch number (e.g., 3,7,10)."
-              : "Please enter a number (1..25000).";
+              : "Please enter a number (1.." + std::to_string(MAX_BULK_N) + ").";
     } else if (selectBranches)
       processSelectiveInput();
     else
@@ -595,16 +622,18 @@ void handleNormalKey(unsigned char key) {
     animationPause = !animationPause;
     break;
   case '+':
-    ANIMATION_DELAY_MS = std::max(0, ANIMATION_DELAY_MS - 5);
+    animationDelayMs = std::max(MIN_ANIMATION_DELAY_MS, animationDelayMs - ANIMATION_DELAY_STEP);
     break;
+  case '-':
   case '_':
-    ANIMATION_DELAY_MS = std::min(100, ANIMATION_DELAY_MS + 5);
+    animationDelayMs = std::min(MAX_ANIMATION_DELAY_MS, animationDelayMs + ANIMATION_DELAY_STEP);
     break;
   case 'l':
   case 'L':
     useYLogScale = !useYLogScale;
     break;
-  case 'r': // Reset animation button added here
+  case 'r':
+
   case 'R':
     if (selectBranches)
       currentBranch = 0;
@@ -612,7 +641,7 @@ void handleNormalKey(unsigned char key) {
       currentBranch = 1;
     currentIndex = 0;
     animationDone = false;
-    glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
+    glutTimerFunc(animationDelayMs, timer, 0);
     break;
   case 'n':
   case 'N':
@@ -640,7 +669,7 @@ void handleNormalKey(unsigned char key) {
       animationDone = false;
       currentBranch = (selectBranches) ? 0 : 1;
       currentIndex = 0;
-      glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
+      glutTimerFunc(animationDelayMs, timer, 0);
     }
     break;
   case 'm':
@@ -651,7 +680,7 @@ void handleNormalKey(unsigned char key) {
     errorMessage.clear();
     if (selectBranches) {
       selectedBranches.clear();
-      for (int i = 1; i <= 10; i++)
+      for (unsigned long long i = 1; i <= DEFAULT_N; i++)
         selectedBranches.push_back(i);
     }
     break;
@@ -670,7 +699,7 @@ void keyboard(unsigned char key, int, int) {
 }
 
 void initOpenGL() {
-  glClearColor(0.05f, 0.05f, 0.1f, 1.0f);
+  glClearColor(BG_R, BG_G, BG_B, 1.0f);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluOrtho2D(-1.2f, 1.2f, -1.2f, 1.2f);
@@ -707,21 +736,10 @@ void display() {
 // Main function
 // -------------------------------------------------------------
 int main(int argc, char **argv) {
-  // Initial bulk mode: compute sequences for 1..10.
-  maxN = 10;
+  maxN = DEFAULT_N;
   auto bulkResult = computeBulkSequences(engine, maxN);
   collatzBranches = std::move(bulkResult.branches);
-  collatzStatsMap.clear();
-  for (const auto &pair : collatzBranches) {
-    unsigned long long startVal = pair.first;
-    const auto &seq = pair.second;
-    CollatzBranchStats s{};
-    s.steps = seq.size() - 1;
-    s.branchPeak = 0;
-    for (unsigned long long val : seq)
-      s.branchPeak = std::max(s.branchPeak, val);
-    collatzStatsMap[startVal] = s;
-  }
+  buildBranchStatsMap();
   computeAxisLimits();
 
   glutInit(&argc, argv);
@@ -732,7 +750,7 @@ int main(int argc, char **argv) {
   initOpenGL();
   glutDisplayFunc(display);
   glutKeyboardFunc(keyboard);
-  glutTimerFunc(ANIMATION_DELAY_MS, timer, 0);
+  glutTimerFunc(animationDelayMs, timer, 0);
   glutMainLoop();
   return 0;
 }

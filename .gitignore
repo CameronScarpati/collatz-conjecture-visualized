@@ -1,11 +1,15 @@
-# Ignore collatz Executable
+# Build artifacts
+CollatzConjecture
 Collatz-Conjecture-Visualization
+build/
+cmake-build-*/
 
-# Ignore build directories
-cmake-build-debug/
-
-# Ignore JetBrains IDE config (adjust if you need to share some settings)
+# IDE configuration
 .idea/
+.vscode/
+*.swp
+*.swo
 
-# Ignore macOS metadata files
+# OS metadata
 .DS_Store
+Thumbs.db
