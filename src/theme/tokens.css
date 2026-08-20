@@ -1,0 +1,71 @@
+/*
+ * Design tokens for the Collatz visualizer.
+ * Light values live on :root; dark values switch via data-theme on <html>.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Typefaces, self-hosted through @fontsource */
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Type scale on a 1.25 ratio: 13, 16, 20, 25, 31, 39, 49 px */
+  --fs-sm: 0.8125rem;
+  --fs-base: 1rem;
+  --fs-md: 1.25rem;
+  --fs-lg: 1.5625rem;
+  --fs-xl: 1.9375rem;
+  --fs-2xl: 2.4375rem;
+  --fs-3xl: 3.0625rem;
+  --lh-body: 1.6;
+  --measure: 65ch;
+
+  /* Color, semantic roles */
+  --bg: #F6F7F6;
+  --surface: #FFFFFF;
+  --text: #1A1E23;
+  --text-muted: #57606C;
+  --line: #DCE0DC;
+  /* Odd steps (3n+1) climb, so they own the growth green; even steps
+     (n/2) descend in violet; records get their own magenta. */
+  --odd: #15803D;
+  /* Use --odd-text instead of --odd when the hue is body-size text,
+     so it holds AA contrast on the light background. */
+  --odd-text: #166534;
+  --even: #6D28D9;
+  --record: #BE185D;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Shape: radius on interactive controls only; panels, cards, and the
+     chart frame stay square. */
+  --radius-control: 6px;
+
+  /* Keyboard focus */
+  --focus-ring: 2px solid var(--even);
+  --focus-offset: 2px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #101418;
+  --surface: #171C22;
+  --text: #E8EAED;
+  --text-muted: #98A2AE;
+  --line: #262C33;
+  --odd: #4ADE80;
+  --odd-text: #4ADE80;
+  --even: #A78BFA;
+  --record: #F472B6;
+}
