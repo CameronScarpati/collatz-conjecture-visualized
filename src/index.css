@@ -1,0 +1,527 @@
+/* Base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+/* The page never scrolls sideways; wide content scrolls inside its own
+   container. clip, not hidden, so position: sticky keeps working. */
+html,
+body {
+  overflow-x: clip;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+}
+
+h1 {
+  font-weight: 700;
+  font-size: var(--fs-2xl);
+  letter-spacing: -0.01em;
+}
+
+h2,
+h3 {
+  font-weight: 600;
+}
+
+code,
+pre,
+kbd,
+samp,
+output {
+  font-family: var(--font-mono);
+}
+
+button {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* Page frame */
+
+.page {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-5) var(--space-8);
+}
+
+.masthead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.tagline {
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+  max-width: var(--measure);
+}
+
+/* View switcher */
+
+.view-switcher {
+  margin-bottom: var(--space-5);
+}
+
+.view-switcher .segmented span {
+  font-size: var(--fs-base);
+  padding: var(--space-2) var(--space-4);
+}
+
+/* Layout: the chart stays sticky on the left and keeps animating while
+   the right column scrolls through controls and then the narrative at a
+   comfortable reading measure */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 56fr) minmax(400px, 44fr);
+  grid-template-areas:
+    'chart controls'
+    'chart explainer';
+  gap: var(--space-5);
+}
+
+/* Chart panel */
+
+.chart-panel {
+  grid-area: chart;
+  align-self: start;
+  position: sticky;
+  top: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: var(--space-4);
+}
+
+.legend {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-bottom: var(--space-3);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.swatch {
+  display: inline-block;
+  width: 22px;
+  border-top: 2px solid var(--text);
+}
+
+.swatch-odd {
+  border-top-color: var(--odd);
+}
+
+.swatch-even {
+  border-top-color: var(--even);
+}
+
+.swatch-record {
+  border-top-color: var(--record);
+}
+
+.swatch-faint {
+  border-top-color: var(--odd);
+  opacity: 0.35;
+}
+
+.chart-canvas {
+  position: relative;
+  width: 100%;
+  height: clamp(360px, 56vh, 600px);
+}
+
+.chart-canvas canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* The statistics view stacks the scatter over a shorter histogram, so
+   both fit the sticky panel together. */
+.chart-canvas-stats {
+  height: clamp(280px, 42vh, 460px);
+}
+
+.chart-canvas-histogram {
+  height: clamp(140px, 20vh, 200px);
+  margin-top: var(--space-3);
+}
+
+.readouts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+}
+
+.readouts div {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.readouts dt {
+  color: var(--text-muted);
+}
+
+.readouts dd {
+  min-width: 8ch;
+}
+
+/* Narrative: a borderless reading column beside the sticky chart */
+
+.explainer {
+  grid-area: explainer;
+  max-width: var(--measure);
+  margin-top: var(--space-4);
+}
+
+.explainer h2 {
+  font-size: var(--fs-md);
+}
+
+.explainer h2 + p {
+  margin-top: var(--space-3);
+}
+
+.explainer p + p,
+.explainer .katex-display + p,
+.explainer h2 + .katex-display {
+  margin-top: var(--space-4);
+}
+
+.explainer p + h2 {
+  margin-top: var(--space-6);
+}
+
+.explainer p {
+  max-width: var(--measure);
+}
+
+.explainer .katex-display {
+  margin: var(--space-4) 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: var(--space-1) 0;
+}
+
+/* Colophon */
+
+.colophon {
+  margin-top: var(--space-7);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  max-width: var(--measure);
+}
+
+.colophon p + p {
+  margin-top: var(--space-2);
+}
+
+.colophon a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.colophon a:hover {
+  color: var(--text);
+}
+
+/* Controls */
+
+.controls {
+  grid-area: controls;
+  display: grid;
+  gap: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: var(--space-5);
+  align-self: start;
+}
+
+.control {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.control-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 500;
+  font-size: var(--fs-sm);
+}
+
+.control-line output {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+input[type='range'] {
+  appearance: none;
+  width: 100%;
+  height: 24px;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--line);
+}
+
+input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -6px;
+  border: none;
+  border-radius: var(--radius-control);
+  background: var(--text);
+}
+
+input[type='range']::-moz-range-track {
+  height: 2px;
+  background: var(--line);
+}
+
+input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: var(--radius-control);
+  background: var(--text);
+}
+
+.segmented-group {
+  border: none;
+  padding: 0;
+}
+
+.segmented-group legend {
+  font-weight: 500;
+  font-size: var(--fs-sm);
+  margin-bottom: var(--space-2);
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  overflow: hidden;
+}
+
+.segmented input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.segmented span {
+  display: block;
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  cursor: pointer;
+  border-left: 1px solid var(--line);
+  transition: background-color 150ms ease-out;
+}
+
+.segmented label:first-child span {
+  border-left: none;
+}
+
+.segmented span:hover {
+  background: var(--bg);
+}
+
+.segmented input:checked + span {
+  background: var(--text);
+  color: var(--surface);
+}
+
+.segmented input:focus-visible + span {
+  outline: var(--focus-ring);
+  outline-offset: -2px;
+}
+
+.preset-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.preset-row .preset {
+  padding: var(--space-1) var(--space-3);
+}
+
+.preset-row .preset-active {
+  background: var(--text);
+  color: var(--surface);
+  border-color: var(--text);
+}
+
+.control-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.text-field {
+  display: grid;
+  gap: var(--space-1);
+  font-weight: 500;
+  font-size: var(--fs-sm);
+}
+
+.text-field input {
+  font-family: var(--font-mono);
+  font-size: var(--fs-base);
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.field-error {
+  font-size: var(--fs-sm);
+  font-weight: 400;
+  color: var(--record);
+}
+
+.field-note {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  max-width: var(--measure);
+}
+
+.check-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 500;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+}
+
+.check-field input {
+  accent-color: var(--even);
+  width: 16px;
+  height: 16px;
+}
+
+button {
+  font-weight: 500;
+  font-size: var(--fs-sm);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+
+button:hover {
+  background: var(--bg);
+}
+
+/* Responsive: single column, chart first, controls beneath it */
+
+@media (max-width: 960px) {
+  .page {
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+
+  h1 {
+    font-size: var(--fs-xl);
+  }
+
+  .masthead {
+    flex-direction: column;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'chart'
+      'controls'
+      'explainer';
+  }
+
+  .chart-panel {
+    position: static;
+  }
+
+  .explainer {
+    margin-top: var(--space-4);
+  }
+
+  .chart-canvas {
+    height: min(52vh, 420px);
+  }
+
+  .chart-canvas-stats {
+    height: min(40vh, 340px);
+  }
+
+  .chart-canvas-histogram {
+    height: min(18vh, 160px);
+  }
+}
+
+/* Reduced motion: freeze every CSS transition and animation */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

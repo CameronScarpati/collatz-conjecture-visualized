@@ -47,11 +47,14 @@ export function sizeCanvas(
   canvas: HTMLCanvasElement,
   cssWidth: number,
   cssHeight: number,
-  dpr: number,
-): CanvasRenderingContext2D {
+): CanvasRenderingContext2D | null {
+  const dpr = window.devicePixelRatio || 1
   canvas.width = Math.round(cssWidth * dpr)
   canvas.height = Math.round(cssHeight * dpr)
-  const ctx = canvas.getContext('2d')!
+  canvas.style.width = `${cssWidth}px`
+  canvas.style.height = `${cssHeight}px`
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return null
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   return ctx
 }
