@@ -1,15 +1,12 @@
-# Build artifacts
-CollatzConjecture
-Collatz-Conjecture-Visualization
-build/
-cmake-build-*/
-
-# IDE configuration
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS metadata
+node_modules/
+dist/
+coverage/
+.netlify/
+.env
+.env.*
+*.local
+*.log
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/
