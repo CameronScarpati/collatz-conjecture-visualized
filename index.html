@@ -4,9 +4,75 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Collatz Conjecture Visualized</title>
+    <meta
+      name="description"
+      content="An interactive tour of the Collatz conjecture: watch hailstone trajectories race each other, grow the reverse tree into coral, and sweep stopping times for a million starts."
+    />
+    <meta name="author" content="Cameron Scarpati" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#F6F7F6" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#101418" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Collatz Conjecture Visualized" />
+    <meta property="og:title" content="Collatz Conjecture Visualized" />
+    <meta
+      property="og:description"
+      content="Halve it if it is even, triple it and add one if it is odd. Race hailstone trajectories, grow the reverse tree into coral, and chart stopping times for a million starts."
+    />
+    <meta property="og:image" content="/social-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="The reverse Collatz tree drawn as glowing green and violet coral on a dark background"
+    />
+    <meta property="og:locale" content="en_US" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Collatz Conjecture Visualized" />
+    <meta
+      name="twitter:description"
+      content="Race hailstone trajectories, grow the reverse Collatz tree into coral, and chart stopping times for a million starts."
+    />
+    <meta name="twitter:image" content="/social-card.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Collatz Conjecture Visualized",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Any",
+        "isAccessibleForFree": true,
+        "description": "An interactive tour of the Collatz conjecture with three views: animated hailstone trajectories, the reverse tree drawn as coral, and stopping-time statistics for a million starts.",
+        "author": {
+          "@type": "Person",
+          "name": "Cameron Scarpati",
+          "sameAs": "https://github.com/CameronScarpati"
+        },
+        "about": {
+          "@type": "Thing",
+          "name": "Collatz conjecture",
+          "sameAs": "https://en.wikipedia.org/wiki/Collatz_conjecture"
+        }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <p>
+        This page is an interactive tour of the Collatz conjecture and needs JavaScript to
+        run. The rule is simple: halve an even number, triple an odd number and add one, and
+        repeat. The conjecture says every start eventually reaches 1, and nobody has proved
+        it. The app animates hailstone trajectories on a log axis, grows the reverse tree
+        into an organic coral whose edges bend by parity, and sweeps total stopping times
+        for up to a million starts with the record setters highlighted. The source lives at
+        <a href="https://github.com/CameronScarpati/collatz-conjecture-visualized"
+          >github.com/CameronScarpati/collatz-conjecture-visualized</a
+        >.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

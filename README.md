@@ -1,198 +1,90 @@
-<a id="readme-top"></a>
+# Collatz Conjecture Visualized
 
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
+An interactive tour of the simplest unsolved problem in mathematics. Take any whole
+number: halve it if it is even, triple it and add one if it is odd, and repeat. The
+Collatz conjecture says you always reach 1, and nobody can prove it.
 
-<br />
-<div align="center">
-  <h1>Collatz Conjecture Visualization</h1>
-  <p>
-    An interactive, real-time visualization of the Collatz conjecture built with C++ and OpenGL.
-  </p>
+![The reverse Collatz tree drawn as coral in dark mode: a violet trunk of doubling runs sweeps up from the number 1 and fans into hundreds of fine green branches, one for every odd predecessor](docs/tree-dark.png)
 
-  <p>
-    <a href="https://github.com/CameronScarpati/collatz-conjecture-visualized/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    &middot;
-    <a href="https://github.com/CameronScarpati/collatz-conjecture-visualized/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
-  </p>
-</div>
+## What it shows
 
-## About
+The app has three views. **Trajectories** races the hailstone paths of chosen starting
+numbers, drawing odd steps in green as they climb and even steps in violet as they
+fall, with a comet head marking each sequence still in flight. **Tree** runs the rule
+backwards, growing every number that leads to 1 outward from the root, with each edge
+bending a little by the parity of its branch, so the whole structure comes out looking
+like coral. **Statistics** sweeps the total stopping time of every start up to one
+million, dots the results into a density cloud, rings each record setter, and piles
+the counts into a histogram.
 
-The [Collatz conjecture](https://en.wikipedia.org/wiki/Collatz_conjecture) is one of the most famous unsolved problems in mathematics. For any positive integer *n*, the sequence is defined as:
+![The trajectory explorer showing the four record setters 27, 97, 871, and 6171 racing on a log axis, each path zigzagging in green and violet before falling to 1](docs/trajectory-light.png)
 
-- If *n* is even: *n* &rarr; *n / 2*
-- If *n* is odd: *n* &rarr; *3n + 1*
+## Why it happens
 
-The conjecture states that this sequence always reaches 1, regardless of the starting value. This application renders thousands of these sequences simultaneously with animated, rainbow-colored trajectories, making it easy to explore the chaotic yet structured behavior of the conjecture.
+A single odd step roughly multiplies a value by 3/2 once you count the halving that
+always follows, and an even step halves it exactly. If both arrive about equally
+often, a typical step scales the value by the square root of 3/4, which is below 1,
+so typical trajectories drift downward. That heuristic explains everything the charts
+show and proves nothing, because no argument yet forces any single trajectory to
+behave typically. The conjecture has been verified far beyond every number this page
+can plot, and it remains open.
 
-### Key Features
+![The statistics view at one hundred thousand starts: a green scatter of stopping times with magenta rings on the record setters, above a violet histogram of the same counts](docs/stats-light.png)
 
-- **Dual visualization modes** &mdash; Bulk mode (compute all sequences from 1 to *N*) and selective mode (pick specific starting values)
-- **Animated rendering** with glow effects and rainbow color mapping via HSV-to-RGB conversion
-- **Logarithmic & linear scaling** to compare sequences across vastly different magnitudes
-- **Real-time statistics overlay** showing step counts, peak values, and averages
-- **Efficient computation** using memoized sequence caching for O(1) lookups on previously computed values
-- **Interactive controls** for animation speed, scale toggling, instant render, and dynamic input
+## Using it
 
-### Built With
+Each view keeps its chart pinned while the controls and a short explanation scroll
+beside it. The trajectory explorer takes up to eight starting numbers typed directly,
+or a range mode that races every start up to two thousand at once with the longest
+trajectory highlighted; presets tell the good stories, including the famous 27 and
+the record breakers, and the axis toggles between log base 2 and linear. The tree
+view has sliders for the two bend angles, the depth, and the growth speed, plus
+shape presets and an option to label the small numbers. The statistics view has one
+slider for how many starts to compute; the sweep spreads across animation frames so
+even one million starts never stall the page. Every view has pause, restart, and
+finish controls, replays itself when it completes, honors the reduced motion
+preference by rendering the finished picture immediately, and follows the light or
+dark theme with a manual toggle in the masthead.
 
-[![C++][cpp-badge]][cpp-url]
-[![OpenGL][opengl-badge]][opengl-url]
-[![GLUT][glut-badge]][glut-url]
-[![CMake][cmake-badge]][cmake-url]
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Visualizations
-
-| Linear Scale (10 branches) | Log Scale (10 branches) |
-|:---:|:---:|
-| ![Linear 10](images/Collatz-Linear-Scale-10-Branches.png) | ![Log 10](images/Collatz-Log-Scale-10-Branches.png) |
-
-| Linear Scale (100 branches) | Log Scale (100 branches) |
-|:---:|:---:|
-| ![Linear 100](images/Collatz-Linear-Scale-100-Branches.png) | ![Log 100](images/Collatz-Log-Scale-100-Branches.png) |
-
-| Selective Mode &mdash; Branches 9, 97, 871, 6171 (Linear) | Selective Mode &mdash; Branches 9, 97, 871, 6171 (Log) |
-|:---:|:---:|
-| ![Selective Linear](images/Collatz-Linear-Scale-Largest-Stopping.png) | ![Selective Log](images/Collatz-Log-Scale-Largest-Stopping.png) |
-
-| Changing Max N | Selective Branch Input |
-|:---:|:---:|
-| ![Change MaxN](images/Collatz-Change-MaxN.png) | ![Change Branches](images/Collatz-Change-Branches.png) |
-
-| Input Validation (Bulk) | Input Validation (Selective) |
-|:---:|:---:|
-| ![MaxN Error](images/Collatz-Change-MaxN-Error.png) | ![Branches Error](images/Collatz-Change-Branches-Error.png) |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Getting Started
-
-### Prerequisites
-
-- A C++17-compatible compiler (GCC, Clang, or MSVC)
-- OpenGL and GLUT (FreeGLUT)
-- CMake 3.20+ (recommended) or manual compilation
-
-**Linux:**
-```sh
-sudo apt install freeglut3-dev cmake
-```
-
-**macOS:**
-```sh
-brew install freeglut cmake
-```
-
-### Build & Run
-
-**Using CMake (recommended):**
-```sh
-git clone https://github.com/CameronScarpati/collatz-conjecture-visualized.git
-cd collatz-conjecture-visualized
-cmake -B build -S .
-cmake --build build
-./build/CollatzConjecture
-```
-
-**Manual compilation (macOS):**
-```sh
-g++ -o CollatzConjecture collatz-visualization.cpp collatz_modes.cpp \
-    -framework OpenGL -framework GLUT -std=c++17 -DGL_SILENCE_DEPRECATION
-./CollatzConjecture
-```
-
-**Manual compilation (Linux):**
-```sh
-g++ -o CollatzConjecture collatz-visualization.cpp collatz_modes.cpp \
-    -lGL -lglut -std=c++17
-./CollatzConjecture
-```
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Usage
-
-Launch the application and it will begin animating Collatz sequences for numbers 1 through 10. Use the keyboard controls below to explore further.
-
-### Keybindings
-
-| Key | Action |
-|-----|--------|
-| `Esc` | Quit |
-| `P` | Pause / Resume animation |
-| `+` / `-` | Speed up / Slow down animation |
-| `L` | Toggle logarithmic / linear Y-axis scale |
-| `R` | Reset animation to the beginning |
-| `N` | Clear screen and prompt for new input |
-| `H` | Toggle help menu overlay |
-| `I` | Toggle instant render mode |
-| `M` | Toggle selective branch mode |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Architecture
+## Running locally
 
 ```
-collatz_engine.h       Core computation engine with memoized caching
-collatz_stats.h        Data structures for per-branch and overall statistics
-collatz_modes.h/cpp    Bulk and selective computation modes
-collatz-visualization.cpp   OpenGL rendering, animation loop, and input handling
-CMakeLists.txt         Cross-platform build configuration
+npm install
+npm run dev
 ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+`npm run build` type-checks and produces the production bundle, `npm run test` runs
+the unit tests, and `npm run lint` runs oxlint.
 
-## Contributing
+## How it is built
 
-Contributions are welcome! Fork the repository, create a feature branch, and open a pull request.
+React, TypeScript, and Vite, with all drawing done by hand on canvas inside a
+requestAnimationFrame loop. Each chart layers two or three canvases so static axes,
+accumulated data, and transient markers repaint independently, and heavy work runs
+inside an eight millisecond frame budget. D3 supplies only the scales. The math
+lives in pure modules with no React imports, covered by unit tests pinned to known
+values such as the 111 steps of 27 and the stopping time records below one hundred.
+KaTeX typesets the mathematics. The site is a single static page, deployable
+anywhere; a live demo link will land here once the Netlify deploy is connected.
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## Notes
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+This is a teaching demo, not a research tool. Arithmetic runs in plain double
+precision with starts capped at 10^15 and a per-step guard just under 2^53, so a
+trajectory that would leave the exact integer range stops and says so instead of
+silently losing precision; the conjecture itself has been verified far beyond that
+by dedicated searches. The tree truncates at a node budget of 25,000 so extreme
+settings stay smooth. This project began as a C++ OpenGL desktop app, which lives on
+in the git history.
+
+## Credits
+
+Built by [Cameron Scarpati](https://github.com/CameronScarpati). The coral rendering
+of the reverse tree follows an idea by
+[Edmund Harriss](https://en.wikipedia.org/wiki/Edmund_Harriss). Background reading:
+the [Collatz conjecture](https://en.wikipedia.org/wiki/Collatz_conjecture) on
+Wikipedia.
 
 ## License
 
-Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Contact
-
-Cameron J. Scarpati &mdash; [LinkedIn](https://linkedin.com/in/cameron-scarpati) &mdash; cameronscarp@gmail.com
-
-Project Link: [https://github.com/CameronScarpati/collatz-conjecture-visualized](https://github.com/CameronScarpati/collatz-conjecture-visualized)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/CameronScarpati/collatz-conjecture-visualized.svg?style=for-the-badge
-[contributors-url]: https://github.com/CameronScarpati/collatz-conjecture-visualized/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/CameronScarpati/collatz-conjecture-visualized.svg?style=for-the-badge
-[forks-url]: https://github.com/CameronScarpati/collatz-conjecture-visualized/network/members
-[stars-shield]: https://img.shields.io/github/stars/CameronScarpati/collatz-conjecture-visualized.svg?style=for-the-badge
-[stars-url]: https://github.com/CameronScarpati/collatz-conjecture-visualized/stargazers
-[issues-shield]: https://img.shields.io/github/issues/CameronScarpati/collatz-conjecture-visualized.svg?style=for-the-badge
-[issues-url]: https://github.com/CameronScarpati/collatz-conjecture-visualized/issues
-[license-shield]: https://img.shields.io/github/license/CameronScarpati/collatz-conjecture-visualized.svg?style=for-the-badge
-[license-url]: https://github.com/CameronScarpati/collatz-conjecture-visualized/blob/master/LICENSE
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/cameron-scarpati
-[cpp-badge]: https://img.shields.io/badge/C++17-00599C?style=for-the-badge&logo=cplusplus&logoColor=white
-[cpp-url]: https://cplusplus.com/
-[opengl-badge]: https://img.shields.io/badge/OpenGL-5586A4?style=for-the-badge&logo=opengl&logoColor=white
-[opengl-url]: https://www.opengl.org/
-[glut-badge]: https://img.shields.io/badge/FreeGLUT-FCC624?style=for-the-badge&logo=opengl&logoColor=black
-[glut-url]: https://freeglut.sourceforge.net/
-[cmake-badge]: https://img.shields.io/badge/CMake-064F8C?style=for-the-badge&logo=cmake&logoColor=white
-[cmake-url]: https://cmake.org/
+MIT
