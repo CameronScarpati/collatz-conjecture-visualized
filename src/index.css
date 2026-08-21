@@ -525,3 +525,15 @@ button:hover {
     scroll-behavior: auto !important;
   }
 }
+
+/* Forced colors (Windows High Contrast) strips background colors, which is
+   the only thing conveying the checked state of segmented controls and the
+   active preset; the system selection colors restore it. */
+@media (forced-colors: active) {
+  .segmented input:checked + span,
+  .preset-row .preset-active {
+    background: SelectedItem;
+    color: SelectedItemText;
+    forced-color-adjust: none;
+  }
+}

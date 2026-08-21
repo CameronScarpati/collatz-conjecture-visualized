@@ -12,6 +12,18 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="theme-color" content="#F6F7F6" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#101418" media="(prefers-color-scheme: dark)" />
+    <script>
+      /* Set the theme before first paint; src/theme/theme.ts owns this logic for
+         the app lifetime and its THEME_KEY must match the storage key here. */
+      try {
+        var theme = localStorage.getItem('collatz-theme')
+        if (theme !== 'dark' && theme !== 'light')
+          theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        document.documentElement.setAttribute('data-theme', theme)
+      } catch (error) {
+        /* Storage denied: the stylesheet default paints and initTheme() retries. */
+      }
+    </script>
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Collatz Conjecture Visualized" />

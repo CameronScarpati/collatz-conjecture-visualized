@@ -27,13 +27,34 @@ export function initTheme(): void {
   setTheme(storedTheme(localStorage) ?? systemTheme())
 }
 
-export function toggleTheme(
-  storage: Pick<Storage, 'setItem'> = localStorage,
+/* Structural subset of MediaQueryList so the logic stays testable without a DOM. */
+type SchemeQuery = {
+  addEventListener: (type: 'change', listener: (event: { matches: boolean }) => void) => void
+}
+
+/* While no choice is stored, the app follows live OS theme changes (sunset
+   auto-switch); a stored choice wins and the listener leaves it alone. */
+export function watchSystemTheme(
+  media: SchemeQuery = window.matchMedia('(prefers-color-scheme: dark)'),
+  storage: Pick<Storage, 'getItem'> = localStorage,
   root: ThemeRoot = document.documentElement,
+): void {
+  media.addEventListener('change', (event) => {
+    if (storedTheme(storage) === null) setTheme(event.matches ? 'dark' : 'light', root)
+  })
+}
+
+export function toggleTheme(
+  storage: Pick<Storage, 'setItem' | 'removeItem'> = localStorage,
+  root: ThemeRoot = document.documentElement,
+  system: ThemeName = systemTheme(),
 ): ThemeName {
   const next: ThemeName = getTheme(root) === 'dark' ? 'light' : 'dark'
   setTheme(next, root)
-  storage.setItem(THEME_KEY, next)
+  /* Landing back on the system's own theme clears the stored choice, so the
+     app resumes following the OS instead of freezing one answer forever. */
+  if (next === system) storage.removeItem(THEME_KEY)
+  else storage.setItem(THEME_KEY, next)
   return next
 }
 
