@@ -1,5 +1,7 @@
 # Collatz Conjecture Visualized
 
+[![CI status](https://github.com/CameronScarpati/collatz-conjecture-visualized/actions/workflows/ci.yml/badge.svg)](https://github.com/CameronScarpati/collatz-conjecture-visualized/actions/workflows/ci.yml)
+
 An interactive tour of the simplest unsolved problem in mathematics. Take any whole
 number: halve it if it is even, triple it and add one if it is odd, and repeat. The
 Collatz conjecture says you always reach 1, and nobody can prove it.
