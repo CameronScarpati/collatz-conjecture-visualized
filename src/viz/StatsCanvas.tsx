@@ -22,6 +22,7 @@ import {
 } from './draw.ts'
 import { makeLinearScale, statsYMax, type NumericScale } from './scales.ts'
 import { useAnimationLoop } from './useAnimationLoop.ts'
+import { watchDevicePixelRatio } from './watchDevicePixelRatio.ts'
 
 interface SimState {
   run: StoppingRun
@@ -292,6 +293,7 @@ export function StatsCanvas({ config, onReadout }: StatsCanvasProps) {
     const redraw = () => helpers.rebuildView()
     const resizeObserver = new ResizeObserver(redraw)
     resizeObserver.observe(wrapper)
+    const stopDprWatch = watchDevicePixelRatio(redraw)
     const themeObserver = new MutationObserver(redraw)
     themeObserver.observe(document.documentElement, {
       attributes: true,
@@ -299,6 +301,7 @@ export function StatsCanvas({ config, onReadout }: StatsCanvasProps) {
     })
     return () => {
       resizeObserver.disconnect()
+      stopDprWatch()
       themeObserver.disconnect()
     }
   }, [helpers])

@@ -5,6 +5,7 @@ import { growCoral, type Coral } from '../math/tree.ts'
 import { readToken } from '../theme/theme.ts'
 import { clearCanvas, sizeCanvas, type ChartLayout } from './draw.ts'
 import { useAnimationLoop } from './useAnimationLoop.ts'
+import { watchDevicePixelRatio } from './watchDevicePixelRatio.ts'
 
 interface SimState {
   coral: Coral
@@ -312,6 +313,7 @@ export function TreeCanvas({
     const redraw = () => helpers.rebuildView()
     const resizeObserver = new ResizeObserver(redraw)
     resizeObserver.observe(wrapper)
+    const stopDprWatch = watchDevicePixelRatio(redraw)
     const themeObserver = new MutationObserver(redraw)
     themeObserver.observe(document.documentElement, {
       attributes: true,
@@ -319,6 +321,7 @@ export function TreeCanvas({
     })
     return () => {
       resizeObserver.disconnect()
+      stopDprWatch()
       themeObserver.disconnect()
     }
   }, [helpers])
