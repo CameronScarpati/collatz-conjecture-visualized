@@ -64,7 +64,11 @@ export function advanceStoppingRun(run: StoppingRun, quota: number): void {
       m = m % 2 === 0 ? m / 2 : 3 * m + 1
       count += 1
     }
-    const total = count + steps[m]
+    const known = steps[m]
+    if (known === undefined) {
+      throw new Error(`stopping time of ${m} was not memoized before ${n}`)
+    }
+    const total = count + known
     steps[n] = total
     run.sumSteps += total
     if (total > run.maxSteps) {
@@ -90,15 +94,22 @@ export interface Histogram {
 export function buildHistogram(run: StoppingRun, binWidth = 5): Histogram {
   const bins = new Uint32Array(Math.floor(run.maxSteps / binWidth) + 1)
   for (let n = 1; n <= run.N; n += 1) {
-    bins[Math.floor(run.steps[n] / binWidth)] += 1
+    const total = run.steps[n]
+    if (total === undefined) throw new Error(`run has no stopping time for ${n}`)
+    const bin = Math.floor(total / binWidth)
+    const count = bins[bin]
+    if (count === undefined) {
+      throw new Error(`stopping time ${total} of ${n} exceeds maxSteps`)
+    }
+    bins[bin] = count + 1
   }
   let maxCount = 0
   let modalBin = 0
-  for (let i = 0; i < bins.length; i += 1) {
-    if (bins[i] > maxCount) {
-      maxCount = bins[i]
+  bins.forEach((count, i) => {
+    if (count > maxCount) {
+      maxCount = count
       modalBin = i
     }
-  }
+  })
   return { bins, binWidth, maxCount, modalBin }
 }

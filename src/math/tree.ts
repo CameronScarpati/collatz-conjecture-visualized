@@ -69,7 +69,7 @@ export function growCoral(config: CoralConfig): Coral {
   let head = 0
   while (head < nodes.length && nodes.length < budget) {
     const node = nodes[head]
-    if (node.depth >= config.maxDepth) break
+    if (node === undefined || node.depth >= config.maxDepth) break
 
     const length = Math.pow(LENGTH_DECAY, node.depth)
     for (const value of childrenOf(node.value)) {
@@ -90,9 +90,9 @@ export function growCoral(config: CoralConfig): Coral {
 
   /* BFS order makes each depth contiguous, so offsets read straight off. */
   const offsets: number[] = []
-  for (let i = 0; i < nodes.length; i += 1) {
-    if (nodes[i].depth === offsets.length) offsets.push(i)
-  }
+  nodes.forEach((node, i) => {
+    if (node.depth === offsets.length) offsets.push(i)
+  })
   offsets.push(nodes.length)
 
   return { nodes, levelOffsets: offsets, bbox: { minX, minY, maxX, maxY } }
