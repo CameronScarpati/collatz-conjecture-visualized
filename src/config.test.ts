@@ -48,7 +48,7 @@ describe('tree presets', () => {
 describe('stats stops', () => {
   it('ascend and stay within the Uint16 safe range', () => {
     for (let i = 1; i < STATS_STOPS.length; i += 1) {
-      expect(STATS_STOPS[i]).toBeGreaterThan(STATS_STOPS[i - 1])
+      expect(STATS_STOPS[i]).toBeGreaterThan(STATS_STOPS[i - 1]!)
     }
     expect(STATS_STOPS[STATS_STOPS.length - 1]).toBe(1_000_000)
   })

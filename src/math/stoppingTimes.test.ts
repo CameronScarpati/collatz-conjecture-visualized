@@ -58,7 +58,7 @@ describe('stopping-time runs', () => {
   it('tracks the running mean input soundly', () => {
     const run = completedRun(1_000)
     let sum = 0
-    for (let n = 1; n <= 1_000; n += 1) sum += run.steps[n]
+    for (let n = 1; n <= 1_000; n += 1) sum += run.steps[n]!
     expect(run.sumSteps).toBe(sum)
   })
 })
@@ -75,7 +75,7 @@ describe('buildHistogram', () => {
   it('places 27 in a nonzero bin and finds a sensible mode', () => {
     const run = completedRun(1_000)
     const histogram = buildHistogram(run)
-    expect(histogram.bins[Math.floor(run.steps[27] / histogram.binWidth)]).toBeGreaterThan(0)
+    expect(histogram.bins[Math.floor(run.steps[27]! / histogram.binWidth)]).toBeGreaterThan(0)
     expect(histogram.bins[histogram.modalBin]).toBe(histogram.maxCount)
     expect(histogram.maxCount).toBeGreaterThan(0)
   })

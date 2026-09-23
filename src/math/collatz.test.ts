@@ -67,7 +67,7 @@ describe('trajectory', () => {
     const t = trajectory(319804831)
     expect(t.overflowed).toBe(true)
     expect(t.steps).toBe(129)
-    const last = t.values[t.values.length - 1]
+    const last = t.values[t.values.length - 1]!
     expect(last).toBe(3827712881638043)
     expect(last % 2).toBe(1)
     expect(last).toBeGreaterThan(OVERFLOW_LIMIT)

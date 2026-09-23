@@ -27,8 +27,8 @@ describe('childrenOf', () => {
     for (let m = 4; m < 2_000; m += 6) {
       const children = childrenOf(m)
       if (children.length === 2) {
-        expect(children[1] % 2).toBe(1)
-        expect(3 * children[1] + 1).toBe(m)
+        expect(children[1]! % 2).toBe(1)
+        expect(3 * children[1]! + 1).toBe(m)
       }
     }
   })
@@ -45,9 +45,9 @@ describe('growCoral', () => {
     const coral = growCoral(config)
     expect(coral.nodes[0]).toMatchObject({ value: 1, depth: 0, parent: -1 })
     for (let i = 1; i < coral.nodes.length; i += 1) {
-      const node = coral.nodes[i]
-      expect(node.depth).toBeGreaterThanOrEqual(coral.nodes[i - 1].depth)
-      expect(coral.nodes[node.parent].depth).toBe(node.depth - 1)
+      const node = coral.nodes[i]!
+      expect(node.depth).toBeGreaterThanOrEqual(coral.nodes[i - 1]!.depth)
+      expect(coral.nodes[node.parent]!.depth).toBe(node.depth - 1)
     }
   })
 
@@ -57,8 +57,8 @@ describe('growCoral', () => {
     expect(offsets[0]).toBe(0)
     expect(offsets[offsets.length - 1]).toBe(coral.nodes.length)
     for (let d = 0; d < offsets.length - 1; d += 1) {
-      for (let i = offsets[d]; i < offsets[d + 1]; i += 1) {
-        expect(coral.nodes[i].depth).toBe(d)
+      for (let i = offsets[d]!; i < offsets[d + 1]!; i += 1) {
+        expect(coral.nodes[i]!.depth).toBe(d)
       }
     }
   })
