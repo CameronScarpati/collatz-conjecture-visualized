@@ -24,6 +24,7 @@ export function StatsControls({ config, onChange }: StatsControlsProps) {
   const [stopIndex, setStopIndex] = useState(() =>
     Math.max(0, STATS_STOPS.indexOf(config.maxN)),
   )
+  const maxN = STATS_STOPS[stopIndex]
   const onChangeRef = useRef(onChange)
   const reduced = useReducedMotion() === true
 
@@ -34,11 +35,12 @@ export function StatsControls({ config, onChange }: StatsControlsProps) {
   /* Debounced commit: dragging across stops restarts the computation only
      once the slider settles for a moment. */
   useEffect(() => {
+    if (maxN === undefined) return
     const id = window.setTimeout(() => {
-      onChangeRef.current({ maxN: STATS_STOPS[stopIndex] })
+      onChangeRef.current({ maxN })
     }, 250)
     return () => window.clearTimeout(id)
-  }, [stopIndex])
+  }, [maxN])
 
   return (
     <motion.form
@@ -51,7 +53,7 @@ export function StatsControls({ config, onChange }: StatsControlsProps) {
       <motion.label className="control" variants={itemVariants}>
         <span className="control-line">
           Starts to compute
-          <output>{formatInt(STATS_STOPS[stopIndex])}</output>
+          <output>{maxN === undefined ? null : formatInt(maxN)}</output>
         </span>
         <input
           type="range"
