@@ -58,7 +58,7 @@ export const TRAJECTORY_PRESETS: Preset<TrajectoryConfig>[] = [
   },
   {
     label: 'Record breakers',
-    note: 'Each start sets a new stopping time record: 111, 118, 178, then 261 steps.',
+    note: 'Each start sets a new total stopping time record: 111, 118, 178, then 261 steps.',
     config: { ...DEFAULT_TRAJECTORY, starts: [27, 97, 871, 6171], stepsPerSecond: 25 },
   },
   {

@@ -330,7 +330,7 @@ export function StatsCanvas({ config, onReadout }: StatsCanvasProps) {
         ref={histWrapperRef}
         className="chart-canvas chart-canvas-histogram"
         role="img"
-        aria-label="Histogram of the same stopping times, showing most starts finish quickly"
+        aria-label="Histogram of the same total stopping times, showing most starts finish quickly"
       >
         <canvas ref={histRef} aria-hidden="true" />
       </div>

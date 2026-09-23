@@ -34,7 +34,7 @@ show and proves nothing, because no argument yet forces any single trajectory to
 behave typically. The conjecture has been verified far beyond every number this page
 can plot, and it remains open.
 
-![The statistics view at one hundred thousand starts: a green scatter of stopping times with magenta rings on the record setters, above a violet histogram of the same counts](docs/stats-light.png)
+![The statistics view at one hundred thousand starts: a green scatter of total stopping times with magenta rings on the record setters, above a violet histogram of the same counts](docs/stats-light.png)
 
 ## Using it
 
@@ -68,10 +68,10 @@ the unit tests, and `npm run lint` runs oxlint.
 React, TypeScript, and Vite, with all drawing done by hand on canvas inside a
 requestAnimationFrame loop. Each animated chart layers two or three canvases so the
 static parts stay put while each frame draws only what changed, and while animating,
-the stopping time sweep computes in small batches that hand control back to the
-browser every frame. D3 supplies only the scales. The math lives in pure modules with
+the total stopping time sweep computes in small batches that hand control back to
+the browser every frame. D3 supplies only the scales. The math lives in pure modules with
 no React imports, covered by unit tests pinned to known values such as the 111 steps
-of 27 and the stopping time records below one hundred. KaTeX typesets the
+of 27 and the total stopping time records below one hundred. KaTeX typesets the
 mathematics. The site is a single static page, deployable anywhere; the live copy is
 served from Netlify.
 

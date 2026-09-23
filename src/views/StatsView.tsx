@@ -15,7 +15,7 @@ export function StatsView({ config, onConfigChange }: StatsViewProps) {
 
   return (
     <div className="layout">
-      <section className="chart-panel" aria-label="Stopping time statistics">
+      <section className="chart-panel" aria-label="Total stopping time statistics">
         <ul className="legend">
           <li>
             <span className="swatch swatch-faint" aria-hidden="true" />
@@ -27,7 +27,7 @@ export function StatsView({ config, onConfigChange }: StatsViewProps) {
           </li>
           <li>
             <span className="swatch swatch-even" aria-hidden="true" />
-            histogram of stopping times
+            histogram of total stopping times
           </li>
         </ul>
         <StatsCanvas config={config} onReadout={setReadout} />

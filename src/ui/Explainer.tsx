@@ -84,7 +84,7 @@ function StatsExplainer() {
       <MathBlock tex="\sqrt{\tfrac{3}{2} \cdot \tfrac{1}{2}} = \tfrac{\sqrt{3}}{2} \approx 0.866 < 1" />
       <p>
         So typical trajectories drift downward, which matches the histogram piling up
-        at modest stopping times. This argument proves nothing, because nothing forces
+        at modest total stopping times. This argument proves nothing, because nothing forces
         any single trajectory to behave typically. That is why the conjecture is still
         open.
       </p>
