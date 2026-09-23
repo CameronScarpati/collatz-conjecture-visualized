@@ -66,7 +66,9 @@ export function advanceStoppingRun(run: StoppingRun, quota: number): void {
     }
     const known = steps[m]
     if (known === undefined) {
-      throw new Error(`stopping time of ${m} was not memoized before ${n}`)
+      throw new Error(
+        `run.steps has no entry for ${m}, which ${n} needs (length ${steps.length})`,
+      )
     }
     const total = count + known
     steps[n] = total
@@ -90,16 +92,30 @@ export interface Histogram {
   modalBin: number
 }
 
-/* Counts of stopping times over [0, maxSteps], binned by binWidth. */
+/*
+ * Counts of stopping times over [0, maxSteps], binned by binWidth. A bad
+ * width is a caller's input and throws RangeError; the checks inside the
+ * loop catch a run whose fields disagree with each other.
+ */
 export function buildHistogram(run: StoppingRun, binWidth = 5): Histogram {
+  if (!Number.isFinite(binWidth) || binWidth <= 0) {
+    throw new RangeError(`binWidth must be a finite number above 0, got ${binWidth}`)
+  }
   const bins = new Uint32Array(Math.floor(run.maxSteps / binWidth) + 1)
   for (let n = 1; n <= run.N; n += 1) {
     const total = run.steps[n]
-    if (total === undefined) throw new Error(`run has no stopping time for ${n}`)
+    if (total === undefined) {
+      throw new Error(
+        `run.steps has no entry for ${n} of N = ${run.N} (length ${run.steps.length})`,
+      )
+    }
     const bin = Math.floor(total / binWidth)
     const count = bins[bin]
     if (count === undefined) {
-      throw new Error(`stopping time ${total} of ${n} exceeds maxSteps`)
+      throw new Error(
+        `stopping time ${total} of ${n} falls in bin ${bin}, ` +
+          `past the ${bins.length} bins that maxSteps ${run.maxSteps} allows`,
+      )
     }
     bins[bin] = count + 1
   }

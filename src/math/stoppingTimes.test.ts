@@ -11,6 +11,16 @@ function completedRun(N: number) {
   return run
 }
 
+/* What fn throws, so a test can pin both the error class and its message. */
+function thrownBy(fn: () => unknown): unknown {
+  try {
+    fn()
+  } catch (error) {
+    return error
+  }
+  return undefined
+}
+
 describe('stopping-time runs', () => {
   it('memoizes correct totals for known values at N = 100', () => {
     const run = completedRun(100)
@@ -106,6 +116,19 @@ describe('stopping-time runs', () => {
     /* 10 5 16 8 4 2 1 is six steps. */
     expect(run.steps[10]).toBe(6)
   })
+
+  it('refuses a memo too short to hold a value the walk lands on', () => {
+    /*
+     * The memo only has slots 0 and 1. Start 2 falls straight to 1, but
+     * 3 walks 10 5 16 8 4 2 and first dips below itself at 2, which has
+     * no slot to read.
+     */
+    const run = createStoppingRun(10)
+    run.steps = new Uint16Array(2)
+    expect(thrownBy(() => advanceStoppingRun(run, 10))).toStrictEqual(
+      new Error('run.steps has no entry for 2, which 3 needs (length 2)'),
+    )
+  })
 })
 
 describe('buildHistogram', () => {
@@ -153,5 +176,35 @@ describe('buildHistogram', () => {
     const histogram = buildHistogram(completedRun(100_000))
     expect(histogram.bins.length).toBe(71)
     expect(histogram.bins[70]).toBe(1)
+  })
+
+  it('rejects a bin width that is not a finite number above 0', () => {
+    const run = completedRun(10)
+    for (const binWidth of [0, -5, Number.NaN, Number.POSITIVE_INFINITY]) {
+      expect(thrownBy(() => buildHistogram(run, binWidth))).toStrictEqual(
+        new RangeError(`binWidth must be a finite number above 0, got ${binWidth}`),
+      )
+    }
+  })
+
+  it('refuses a run whose N reaches past its memo', () => {
+    /* The memo holds 0 through 10, so start 11 has no stored total. */
+    const run = completedRun(10)
+    run.N = 12
+    expect(thrownBy(() => buildHistogram(run))).toStrictEqual(
+      new Error('run.steps has no entry for 11 of N = 12 (length 11)'),
+    )
+  })
+
+  it('refuses a run whose totals exceed its maxSteps', () => {
+    /*
+     * The true max below 10 is 19. Claiming 10 sizes three width-5 bins,
+     * and 7, whose 16 steps belong in bin 3, is the first start to miss.
+     */
+    const run = completedRun(10)
+    run.maxSteps = 10
+    expect(thrownBy(() => buildHistogram(run))).toStrictEqual(
+      new Error('stopping time 16 of 7 falls in bin 3, past the 3 bins that maxSteps 10 allows'),
+    )
   })
 })
