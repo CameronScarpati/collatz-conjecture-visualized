@@ -65,9 +65,8 @@ export function StatsControls({ config, onChange }: StatsControlsProps) {
         />
       </motion.label>
       <motion.p className="field-note" variants={itemVariants}>
-        Every stopping time up to one million computes in about a second, spread
-        across animation frames so the page never stalls. Records ring themselves
-        as the sweep passes them.
+        The sweep spreads across animation frames, so the scatter fills in as
+        it runs, and the record setters are ringed once it finishes.
       </motion.p>
     </motion.form>
   )
