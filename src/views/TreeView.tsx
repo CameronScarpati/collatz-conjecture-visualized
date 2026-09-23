@@ -46,11 +46,11 @@ export function TreeView({ config, onConfigChange, onPreset }: TreeViewProps) {
         <ul className="legend">
           <li>
             <span className="swatch swatch-even" aria-hidden="true" />
-            doubling runs, toward the trunk
+            shallow edges, near the root
           </li>
           <li>
             <span className="swatch swatch-odd" aria-hidden="true" />
-            odd branches, toward the tips
+            deep edges, toward the tips
           </li>
         </ul>
         <TreeCanvas
