@@ -49,7 +49,11 @@ describe('stopping-time runs', () => {
   it('produces identical results in small quotas and in one pass', () => {
     const oneShot = completedRun(5_000)
     const chunked = createStoppingRun(5_000)
-    while (!chunked.done) advanceStoppingRun(chunked, 137)
+    /* Capped so a run that never finishes fails here instead of hanging. */
+    for (let calls = 0; !chunked.done && calls < 5_000; calls += 1) {
+      advanceStoppingRun(chunked, 137)
+    }
+    expect(chunked.done).toBe(true)
     expect(chunked.steps).toEqual(oneShot.steps)
     expect(chunked.records).toEqual(oneShot.records)
     expect(chunked.sumSteps).toBe(oneShot.sumSteps)
