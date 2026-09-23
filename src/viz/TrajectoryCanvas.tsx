@@ -23,6 +23,7 @@ import {
 } from './scales.ts'
 import { useAnimationLoop } from './useAnimationLoop.ts'
 import { watchDevicePixelRatio } from './watchDevicePixelRatio.ts'
+import { watchFontLoading } from './watchFontLoading.ts'
 
 interface BranchState extends Trajectory {
   start: number
@@ -412,6 +413,7 @@ export function TrajectoryCanvas({
     const resizeObserver = new ResizeObserver(redraw)
     resizeObserver.observe(wrapper)
     const stopDprWatch = watchDevicePixelRatio(redraw)
+    const stopFontWatch = watchFontLoading(redraw)
     const themeObserver = new MutationObserver(redraw)
     themeObserver.observe(document.documentElement, {
       attributes: true,
@@ -420,6 +422,7 @@ export function TrajectoryCanvas({
     return () => {
       resizeObserver.disconnect()
       stopDprWatch()
+      stopFontWatch()
       themeObserver.disconnect()
     }
   }, [helpers])
