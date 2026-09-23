@@ -18,9 +18,9 @@ numbers, drawing odd steps in green as they climb and even steps in violet as th
 fall, with a comet head marking each sequence still in flight. **Tree** runs the rule
 backwards, growing every number that leads to 1 outward from the root, with each edge
 bending a little by the parity of its branch, so the whole structure comes out looking
-like coral. **Statistics** sweeps the total stopping time of every start up to one
-million, dots the results into a density cloud, rings each record setter, and piles
-the counts into a histogram.
+like coral. **Statistics** sweeps the total stopping time of every start up to a
+limit you choose, as high as one million, dots the results into a density cloud, rings
+each record setter, and piles the counts into a histogram.
 
 ![The trajectory explorer showing the four record setters 27, 97, 871, and 6171 racing on a log axis, each path zigzagging in green and violet before falling to 1](docs/trajectory-light.png)
 
@@ -66,12 +66,13 @@ the unit tests, and `npm run lint` runs oxlint.
 
 React, TypeScript, and Vite, with all drawing done by hand on canvas inside a
 requestAnimationFrame loop. Each animated chart layers two or three canvases so the
-static parts stay put while each frame draws only what changed, and the stopping time
-sweep computes in small batches that hand control back to the browser every frame. D3
-supplies only the scales. The math lives in pure modules with no React imports,
-covered by unit tests pinned to known values such as the 111 steps of 27 and the
-stopping time records below one hundred. KaTeX typesets the mathematics. The site is a
-single static page, deployable anywhere; the live copy is served from Netlify.
+static parts stay put while each frame draws only what changed, and while animating,
+the stopping time sweep computes in small batches that hand control back to the
+browser every frame. D3 supplies only the scales. The math lives in pure modules with
+no React imports, covered by unit tests pinned to known values such as the 111 steps
+of 27 and the stopping time records below one hundred. KaTeX typesets the
+mathematics. The site is a single static page, deployable anywhere; the live copy is
+served from Netlify.
 
 ## Notes
 
