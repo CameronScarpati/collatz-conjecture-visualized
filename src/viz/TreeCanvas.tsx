@@ -6,6 +6,7 @@ import { readToken } from '../theme/theme.ts'
 import { clearCanvas, sizeCanvas, type ChartLayout } from './draw.ts'
 import { useAnimationLoop } from './useAnimationLoop.ts'
 import { watchDevicePixelRatio } from './watchDevicePixelRatio.ts'
+import { watchFontLoading } from './watchFontLoading.ts'
 
 interface SimState {
   coral: Coral
@@ -331,6 +332,7 @@ export function TreeCanvas({
     const resizeObserver = new ResizeObserver(redraw)
     resizeObserver.observe(wrapper)
     const stopDprWatch = watchDevicePixelRatio(redraw)
+    const stopFontWatch = watchFontLoading(redraw)
     const themeObserver = new MutationObserver(redraw)
     themeObserver.observe(document.documentElement, {
       attributes: true,
@@ -339,6 +341,7 @@ export function TreeCanvas({
     return () => {
       resizeObserver.disconnect()
       stopDprWatch()
+      stopFontWatch()
       themeObserver.disconnect()
     }
   }, [helpers])
