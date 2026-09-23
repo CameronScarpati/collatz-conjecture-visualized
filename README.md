@@ -9,7 +9,7 @@ Collatz conjecture says you always reach 1, and nobody can prove it.
 The app is live at
 [collatz-conjecture-visualized.netlify.app](https://collatz-conjecture-visualized.netlify.app/).
 
-![The reverse Collatz tree drawn as coral in dark mode: a violet trunk of doubling runs sweeps up from the number 1 and fans into hundreds of fine green branches, one for every odd predecessor](docs/tree-dark.png)
+![The reverse Collatz tree drawn as coral in dark mode: a trunk of doubling runs sweeps up from the number 1 and fans into hundreds of fine branches, one for every odd predecessor, with each edge shaded by depth from violet at the root to green at the tips](docs/tree-dark.png)
 
 ## What it shows
 

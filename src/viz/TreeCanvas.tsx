@@ -355,7 +355,7 @@ export function TreeCanvas({
       ref={wrapperRef}
       className="chart-canvas"
       role="img"
-      aria-label={`The reverse Collatz tree grown from 1 to depth ${config.maxDepth}, drawn as a coral whose edges bend by parity: violet doubling runs curl one way and green odd branches kick the other`}
+      aria-label={`The reverse Collatz tree grown from 1 to depth ${config.maxDepth}, drawn as a coral whose edges bend by parity, doubling runs curling one way and odd branches kicking the other, and shade by depth from violet at the root to green at the tips`}
     >
       <canvas ref={bgRef} aria-hidden="true" />
       <canvas ref={fgRef} aria-hidden="true" />
