@@ -178,13 +178,23 @@ describe('buildHistogram', () => {
     expect(histogram.bins[70]).toBe(1)
   })
 
-  it('rejects a bin width that is not a finite number above 0', () => {
+  it('rejects a bin width that is not a finite number of at least 1', () => {
     const run = completedRun(10)
-    for (const binWidth of [0, -5, Number.NaN, Number.POSITIVE_INFINITY]) {
+    const widths = [0, -5, Number.NaN, Number.POSITIVE_INFINITY, 0.5, 1e-7, Number.MIN_VALUE]
+    for (const binWidth of widths) {
       expect(thrownBy(() => buildHistogram(run, binWidth))).toStrictEqual(
-        new RangeError(`binWidth must be a finite number above 0, got ${binWidth}`),
+        new RangeError(`binWidth must be a finite number of at least 1, got ${binWidth}`),
       )
     }
+  })
+
+  it('gives each whole step its own bin at width 1', () => {
+    /* The first ten starts take 0 1 7 2 5 8 16 3 19 6 steps. */
+    const histogram = buildHistogram(completedRun(10), 1)
+    expect(histogram.bins.length).toBe(20)
+    const expected = new Array<number>(20).fill(0)
+    for (const steps of [0, 1, 7, 2, 5, 8, 16, 3, 19, 6]) expected[steps] = 1
+    expect(Array.from(histogram.bins)).toEqual(expected)
   })
 
   it('refuses a run whose N reaches past its memo', () => {

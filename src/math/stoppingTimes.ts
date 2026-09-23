@@ -95,11 +95,13 @@ export interface Histogram {
 /*
  * Counts of stopping times over [0, maxSteps], binned by binWidth. A bad
  * width is a caller's input and throws RangeError; the checks inside the
- * loop catch a run whose fields disagree with each other.
+ * loop catch a run whose fields disagree with each other. Stopping times
+ * are whole numbers, so a width below 1 could only add bins that stay
+ * empty, and a tiny one would ask for more bins than memory holds.
  */
 export function buildHistogram(run: StoppingRun, binWidth = 5): Histogram {
-  if (!Number.isFinite(binWidth) || binWidth <= 0) {
-    throw new RangeError(`binWidth must be a finite number above 0, got ${binWidth}`)
+  if (!Number.isFinite(binWidth) || binWidth < 1) {
+    throw new RangeError(`binWidth must be a finite number of at least 1, got ${binWidth}`)
   }
   const bins = new Uint32Array(Math.floor(run.maxSteps / binWidth) + 1)
   for (let n = 1; n <= run.N; n += 1) {
