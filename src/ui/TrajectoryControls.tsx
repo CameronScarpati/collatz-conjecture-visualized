@@ -205,9 +205,10 @@ export function TrajectoryControls({
           max={SPEED_STOPS.length - 1}
           step={1}
           value={speedIndex === -1 ? 2 : speedIndex}
-          onChange={(event) =>
-            onChange({ stepsPerSecond: SPEED_STOPS[Number(event.target.value)] })
-          }
+          onChange={(event) => {
+            const stepsPerSecond = SPEED_STOPS[Number(event.target.value)]
+            if (stepsPerSecond !== undefined) onChange({ stepsPerSecond })
+          }}
         />
       </motion.label>
 
