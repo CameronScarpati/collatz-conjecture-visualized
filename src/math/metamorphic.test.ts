@@ -70,6 +70,8 @@ describe('reverse tree against the forward map', () => {
     }
     const config = { evenAngleDeg: 8, oddAngleDeg: 20, maxDepth: 40, nodeBudget: 3_000 }
     const { nodes } = growCoral(config)
+    /* The budget ends growth well before maxDepth, so the loop is never vacuous. */
+    expect(nodes).toHaveLength(config.nodeBudget)
     for (const node of nodes.slice(1)) {
       expect(stepOnce(node.value)).toBe(nodes[node.parent]?.value)
       expect(node.depth).toBe(trajectory(node.value).steps)
