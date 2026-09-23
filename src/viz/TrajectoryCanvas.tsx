@@ -131,11 +131,15 @@ export function TrajectoryCanvas({
       let maxSteps = 1
       let maxPeak = 2
       let longestIdx = 0
+      let longestSteps = -1
       let overflowed = 0
       branches.forEach((branch, i) => {
         if (branch.steps > maxSteps) maxSteps = branch.steps
         if (branch.peak > maxPeak) maxPeak = branch.peak
-        if (branch.steps > branches[longestIdx].steps) longestIdx = i
+        if (branch.steps > longestSteps) {
+          longestSteps = branch.steps
+          longestIdx = i
+        }
         if (branch.overflowed) overflowed += 1
       })
       simRef.current = {
@@ -191,6 +195,7 @@ export function TrajectoryCanvas({
       const cfg = configRef.current
       for (let i = 0; i < sim.branches.length; i += 1) {
         const branch = sim.branches[i]
+        if (branch === undefined) continue
         const branchFrom = Math.min(from, branch.steps)
         const branchTo = Math.min(to, branch.steps)
         if (branchTo <= branchFrom) continue
@@ -252,7 +257,9 @@ export function TrajectoryCanvas({
       const step = Math.floor(sim.clock)
       for (const branch of sim.branches) {
         if (step >= branch.steps) continue
-        drawHead(view.fg, view.x(step), view.y(branch.values[step]), view.palette.text)
+        const value = branch.values[step]
+        if (value === undefined) continue
+        drawHead(view.fg, view.x(step), view.y(value), view.palette.text)
       }
     }
 

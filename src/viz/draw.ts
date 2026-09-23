@@ -177,9 +177,11 @@ export function drawParitySegments(
     ctx.globalAlpha = style.alpha ?? 1
     ctx.beginPath()
     for (let i = fromStep; i < toStep; i += 1) {
-      if (values[i] % 2 !== parity) continue
-      ctx.moveTo(xScale(i), yScale(values[i]))
-      ctx.lineTo(xScale(i + 1), yScale(values[i + 1]))
+      const v = values[i]
+      const next = values[i + 1]
+      if (v === undefined || next === undefined || v % 2 !== parity) continue
+      ctx.moveTo(xScale(i), yScale(v))
+      ctx.lineTo(xScale(i + 1), yScale(next))
     }
     ctx.stroke()
   }
@@ -197,7 +199,8 @@ export function drawPolylineRange(
   toStep: number,
   style: TraceStyle,
 ): void {
-  if (toStep <= fromStep) return
+  const first = values[fromStep]
+  if (toStep <= fromStep || first === undefined) return
   const area = plotArea(layout)
   ctx.save()
   ctx.beginPath()
@@ -209,9 +212,11 @@ export function drawPolylineRange(
   ctx.setLineDash(style.dash ?? [])
   ctx.lineJoin = 'round'
   ctx.beginPath()
-  ctx.moveTo(xScale(fromStep), yScale(values[fromStep]))
+  ctx.moveTo(xScale(fromStep), yScale(first))
   for (let i = fromStep + 1; i <= toStep; i += 1) {
-    ctx.lineTo(xScale(i), yScale(values[i]))
+    const v = values[i]
+    if (v === undefined) continue
+    ctx.lineTo(xScale(i), yScale(v))
   }
   ctx.stroke()
   ctx.restore()
@@ -231,7 +236,8 @@ export function drawTrace(
   count: number,
   style: TraceStyle,
 ): void {
-  if (count < 2) return
+  const first = values[0]
+  if (count < 2 || first === undefined) return
   const area = plotArea(layout)
   ctx.save()
   ctx.beginPath()
@@ -244,11 +250,13 @@ export function drawTrace(
   ctx.lineJoin = 'round'
   ctx.beginPath()
   if (count > area.w * 2) {
-    decimatedPath(ctx, xScale, yScale, values, count)
+    decimatedPath(ctx, xScale, yScale, values, first, count)
   } else {
-    ctx.moveTo(xScale(0), yScale(values[0]))
+    ctx.moveTo(xScale(0), yScale(first))
     for (let i = 1; i < count; i += 1) {
-      ctx.lineTo(xScale(i), yScale(values[i]))
+      const v = values[i]
+      if (v === undefined) continue
+      ctx.lineTo(xScale(i), yScale(v))
     }
   }
   ctx.stroke()
@@ -260,11 +268,12 @@ function decimatedPath(
   xScale: NumericScale,
   yScale: NumericScale,
   values: Float64Array,
+  first: number,
   count: number,
 ): void {
   let col = Math.round(xScale(0))
-  let min = values[0]
-  let max = values[0]
+  let min = first
+  let max = first
   let started = false
   const emit = (x: number, lo: number, hi: number) => {
     const yLo = yScale(lo)
@@ -278,6 +287,7 @@ function decimatedPath(
   }
   for (let i = 1; i < count; i += 1) {
     const v = values[i]
+    if (v === undefined) continue
     const x = Math.round(xScale(i))
     if (x === col) {
       if (v < min) min = v
@@ -378,10 +388,11 @@ export function drawBars(
   ctx.save()
   ctx.fillStyle = color
   for (let i = 0; i < bins.length; i += 1) {
-    if (bins[i] === 0) continue
+    const count = bins[i]
+    if (count === undefined || count === 0) continue
     const x0 = xScale(i * binWidth)
     const x1 = xScale((i + 1) * binWidth)
-    const y = yScale(bins[i])
+    const y = yScale(count)
     ctx.fillRect(x0 + 0.5, y, Math.max(1, x1 - x0 - 1), bottom - y)
   }
   ctx.restore()

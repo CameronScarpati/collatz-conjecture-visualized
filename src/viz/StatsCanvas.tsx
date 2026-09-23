@@ -120,8 +120,10 @@ export function StatsCanvas({ config, onReadout }: StatsCanvasProps) {
       ctx.globalAlpha = 0.35
       ctx.fillStyle = view.palette.odd
       for (let n = from; n <= to; n += 1) {
+        const steps = sim.run.steps[n]
+        if (steps === undefined) continue
         const x = view.x(n)
-        const y = view.y(sim.run.steps[n])
+        const y = view.y(steps)
         ctx.fillRect(x - 0.75, y - 0.75, 1.5, 1.5)
       }
       ctx.restore()

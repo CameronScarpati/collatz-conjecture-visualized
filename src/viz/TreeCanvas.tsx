@@ -41,8 +41,8 @@ function parseHex(hex: string): [number, number, number] {
 }
 
 function lerpColor(a: [number, number, number], b: [number, number, number], t: number): string {
-  const mix = (i: number) => Math.round(a[i] + (b[i] - a[i]) * t)
-  return `rgb(${mix(0)}, ${mix(1)}, ${mix(2)})`
+  const mix = (from: number, to: number) => Math.round(from + (to - from) * t)
+  return `rgb(${mix(a[0], b[0])}, ${mix(a[1], b[1])}, ${mix(a[2], b[2])})`
 }
 
 interface TreeCanvasProps {
@@ -123,9 +123,11 @@ export function TreeCanvas({
       const offsetX = FIT_PADDING + (usableW - spanX * scale) / 2
       const offsetY = FIT_PADDING + (usableH - spanY * scale) / 2
       for (let i = 0; i < nodes.length; i += 1) {
-        sim.screenX[i] = offsetX + (nodes[i].x - bbox.minX) * scale
+        const node = nodes[i]
+        if (node === undefined) continue
+        sim.screenX[i] = offsetX + (node.x - bbox.minX) * scale
         /* Flip y: the layout grows upward, canvas y grows downward. */
-        sim.screenY[i] = offsetY + (bbox.maxY - nodes[i].y) * scale
+        sim.screenY[i] = offsetY + (bbox.maxY - node.y) * scale
       }
     }
 
@@ -136,6 +138,7 @@ export function TreeCanvas({
       clearCanvas(view.bg, view.layout)
       const x = sim.screenX[0]
       const y = sim.screenY[0]
+      if (x === undefined || y === undefined) return
       view.bg.save()
       view.bg.fillStyle = view.palette.text
       view.bg.beginPath()
@@ -162,29 +165,41 @@ export function TreeCanvas({
       ctx.save()
       ctx.lineCap = 'round'
       for (let level = fromLevel + 1; level <= toLevel; level += 1) {
-        if (level + 1 >= levelOffsets.length) break
+        const start = levelOffsets[level]
+        const end = levelOffsets[level + 1]
+        if (start === undefined || end === undefined) break
         const t = cfg.maxDepth > 0 ? level / cfg.maxDepth : 0
         ctx.strokeStyle = lerpColor(view.palette.trunk, view.palette.tips, t)
         ctx.lineWidth = Math.max(0.75, 3 * Math.pow(0.93, level))
         ctx.beginPath()
-        for (let i = levelOffsets[level]; i < levelOffsets[level + 1]; i += 1) {
-          const parent = nodes[i].parent
-          ctx.moveTo(sim.screenX[parent], sim.screenY[parent])
-          ctx.lineTo(sim.screenX[i], sim.screenY[i])
+        for (let i = start; i < end; i += 1) {
+          const node = nodes[i]
+          if (node === undefined) continue
+          const px = sim.screenX[node.parent]
+          const py = sim.screenY[node.parent]
+          const x = sim.screenX[i]
+          const y = sim.screenY[i]
+          if (px === undefined || py === undefined || x === undefined || y === undefined) continue
+          ctx.moveTo(px, py)
+          ctx.lineTo(x, y)
         }
         ctx.stroke()
         if (cfg.labelSmall && level <= 12) {
           ctx.font = view.palette.monoFont
           ctx.textAlign = 'center'
           ctx.textBaseline = 'middle'
-          for (let i = levelOffsets[level]; i < levelOffsets[level + 1]; i += 1) {
-            if (nodes[i].value >= 100) continue
-            const label = String(nodes[i].value)
+          for (let i = start; i < end; i += 1) {
+            const node = nodes[i]
+            if (node === undefined || node.value >= 100) continue
+            const x = sim.screenX[i]
+            const y = sim.screenY[i]
+            if (x === undefined || y === undefined) continue
+            const label = String(node.value)
             ctx.lineWidth = 3
             ctx.strokeStyle = view.palette.surface
-            ctx.strokeText(label, sim.screenX[i], sim.screenY[i])
+            ctx.strokeText(label, x, y)
             ctx.fillStyle = view.palette.text
-            ctx.fillText(label, sim.screenX[i], sim.screenY[i])
+            ctx.fillText(label, x, y)
           }
         }
       }
@@ -244,8 +259,10 @@ export function TreeCanvas({
       if (!sim || !emit) return
       const { levelOffsets, nodes } = sim.coral
       const upto = Math.min(sim.drawnLevel + 1, levelOffsets.length - 1)
+      const nodesDrawn = levelOffsets[upto]
+      if (nodesDrawn === undefined) return
       emit({
-        nodesDrawn: levelOffsets[upto],
+        nodesDrawn,
         depthDrawn: sim.drawnLevel,
         totalNodes: nodes.length,
         totalDepth: sim.totalDepth,
