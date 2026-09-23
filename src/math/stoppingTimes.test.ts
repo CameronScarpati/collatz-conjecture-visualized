@@ -61,6 +61,47 @@ describe('stopping-time runs', () => {
     for (let n = 1; n <= 1_000; n += 1) sum += run.steps[n]!
     expect(run.sumSteps).toBe(sum)
   })
+
+  it('starts done only when there is nothing past n = 1 to compute', () => {
+    expect(createStoppingRun(1).done).toBe(true)
+    const run = createStoppingRun(2)
+    expect(run.done).toBe(false)
+    advanceStoppingRun(run, 1)
+    expect(run.done).toBe(true)
+    /* 2 -> 1 is one step, which beats the zero steps of n = 1. */
+    expect(run.steps[2]).toBe(1)
+    expect(run.records).toEqual([
+      { n: 1, steps: 0 },
+      { n: 2, steps: 1 },
+    ])
+  })
+
+  it('computes exactly quota starts per call', () => {
+    /*
+     * From next = 2, a quota of 10 covers starts 2 through 11. 11 takes
+     * 14 steps (11 34 17 52 26 13 40 20 10 5 16 8 4 2 1), and 12 must
+     * still be untouched.
+     */
+    const run = createStoppingRun(100)
+    advanceStoppingRun(run, 10)
+    expect(run.next).toBe(12)
+    expect(run.done).toBe(false)
+    expect(run.steps[11]).toBe(14)
+    expect(run.steps[12]).toBe(0)
+  })
+
+  it('is not done until N itself has been computed', () => {
+    /* Starts 2 through 9 leave next at N = 10, which is still owed. */
+    const run = createStoppingRun(10)
+    advanceStoppingRun(run, 8)
+    expect(run.next).toBe(10)
+    expect(run.done).toBe(false)
+    advanceStoppingRun(run, 8)
+    expect(run.next).toBe(11)
+    expect(run.done).toBe(true)
+    /* 10 5 16 8 4 2 1 is six steps. */
+    expect(run.steps[10]).toBe(6)
+  })
 })
 
 describe('buildHistogram', () => {
@@ -78,5 +119,20 @@ describe('buildHistogram', () => {
     expect(histogram.bins[Math.floor(run.steps[27]! / histogram.binWidth)]).toBeGreaterThan(0)
     expect(histogram.bins[histogram.modalBin]).toBe(histogram.maxCount)
     expect(histogram.maxCount).toBeGreaterThan(0)
+  })
+
+  it('bins the first ten starts to match hand-counted stopping times', () => {
+    /*
+     * Stopping times for n = 1 to 10 are 0 1 7 2 5 8 16 3 19 6, so the
+     * max is 19 and width-5 bins [0,5) [5,10) [10,15) [15,20) hold
+     * 4 4 0 2. Bins 0 and 1 tie at 4, and the mode is the first of them.
+     */
+    const run = completedRun(10)
+    const histogram = buildHistogram(run)
+    expect(Array.from(histogram.bins)).toEqual([4, 4, 0, 2])
+    expect(histogram.maxCount).toBe(4)
+    expect(histogram.modalBin).toBe(0)
+    /* Width 10 folds them into [0,10) and [10,20), holding 8 and 2. */
+    expect(Array.from(buildHistogram(run, 10).bins)).toEqual([8, 2])
   })
 })

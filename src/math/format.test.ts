@@ -38,4 +38,10 @@ describe('formatValue', () => {
     expect(formatValue(1414236446719942)).toBe('1.41e15')
     expect(formatValue(Number.NaN)).toBe('n/a')
   })
+
+  it('switches to exponential exactly at ten million', () => {
+    /* (1e7).toExponential(2) is "1.00e+7", and the plus sign is dropped. */
+    expect(formatValue(9_999_999)).toBe('9,999,999')
+    expect(formatValue(10_000_000)).toBe('1.00e7')
+  })
 })

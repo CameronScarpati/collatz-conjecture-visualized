@@ -68,6 +68,64 @@ describe('growCoral', () => {
     expect(coral.nodes.length).toBe(500)
   })
 
+  it('turns the budget away between two children of one node', () => {
+    /*
+     * The first five nodes are 1 2 4 8 16, and 16 has two children, 32
+     * and 5. A budget of 6 admits 32 and must refuse 5.
+     */
+    const coral = growCoral({ ...config, maxDepth: 40, nodeBudget: 6 })
+    expect(coral.nodes.map((n) => n.value)).toEqual([1, 2, 4, 8, 16, 32])
+  })
+
+  it('places nodes by hand-computed turns and decaying segment lengths', () => {
+    /*
+     * The root heads straight up. Doubling turns 90 degrees clockwise and
+     * the odd branch turns 45 degrees counterclockwise, and the segment
+     * into depth k + 1 has length 0.985^k. Down to depth 5 the spine
+     * 1 2 4 8 16 32 runs right, down, left, up, right, and 5 leaves 16
+     * heading up and to the left, the first odd branch. Nothing is grown
+     * past depth 5.
+     */
+    const coral = growCoral({ evenAngleDeg: 90, oddAngleDeg: 45, maxDepth: 5 })
+    const l1 = 0.985
+    const l2 = 0.985 ** 2
+    const l3 = 0.985 ** 3
+    const l4 = 0.985 ** 4
+    const x16 = 1 - l2
+    const y16 = -l1 + l3
+    const expected = [
+      { value: 1, x: 0, y: 0, angle: Math.PI / 2, depth: 0, parent: -1 },
+      { value: 2, x: 1, y: 0, angle: 0, depth: 1, parent: 0 },
+      { value: 4, x: 1, y: -l1, angle: -Math.PI / 2, depth: 2, parent: 1 },
+      { value: 8, x: x16, y: -l1, angle: -Math.PI, depth: 3, parent: 2 },
+      { value: 16, x: x16, y: y16, angle: -1.5 * Math.PI, depth: 4, parent: 3 },
+      { value: 32, x: x16 + l4, y: y16, angle: -2 * Math.PI, depth: 5, parent: 4 },
+      {
+        value: 5,
+        x: x16 - l4 * Math.SQRT1_2,
+        y: y16 + l4 * Math.SQRT1_2,
+        angle: -1.25 * Math.PI,
+        depth: 5,
+        parent: 4,
+      },
+    ]
+    expect(coral.nodes).toEqual(
+      expected.map((node) => ({
+        ...node,
+        x: expect.closeTo(node.x, 9),
+        y: expect.closeTo(node.y, 9),
+        angle: expect.closeTo(node.angle, 9),
+      })),
+    )
+    expect(coral.levelOffsets).toEqual([0, 1, 2, 3, 4, 5, 7])
+    expect(coral.bbox).toEqual({
+      minX: expect.closeTo(x16 - l4 * Math.SQRT1_2, 9),
+      minY: expect.closeTo(-l1, 9),
+      maxX: expect.closeTo(1, 9),
+      maxY: expect.closeTo(y16 + l4 * Math.SQRT1_2, 9),
+    })
+  })
+
   it('bounds every node inside the reported bbox', () => {
     const coral = growCoral(config)
     for (const node of coral.nodes) {

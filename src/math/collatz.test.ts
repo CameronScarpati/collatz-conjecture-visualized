@@ -57,6 +57,40 @@ describe('trajectory', () => {
     expect(isValidStart(MAX_START)).toBe(true)
   })
 
+  it('names the accepted range when it rejects a start', () => {
+    /* MAX_START is 10^15, and String() prints it in full below 1e21. */
+    expect(() => trajectory(0)).toThrow(
+      /^start must be an integer between 1 and 1000000000000000$/,
+    )
+  })
+
+  it('keeps every value when the sequence outgrows its first buffer', () => {
+    /*
+     * The buffer starts with 256 slots. 6171 takes 261 steps (OEIS
+     * A006877) and 837799 takes 524, the most of any start below one
+     * million, peaking at 2974984576 (cross-checked with arbitrary
+     * precision). Their 262 and 525 values force one and two regrowths,
+     * and each value must follow from the one before it by the map.
+     */
+    const cases = [
+      { start: 6171, steps: 261, peak: 975400 },
+      { start: 837799, steps: 524, peak: 2974984576 },
+    ]
+    for (const { start, steps, peak } of cases) {
+      const t = trajectory(start)
+      expect(t.steps).toBe(steps)
+      expect(t.values.length).toBe(steps + 1)
+      expect(t.peak).toBe(peak)
+      expect(t.values[0]).toBe(start)
+      expect(t.values[steps]).toBe(1)
+      let prev = start
+      for (const v of t.values.subarray(1)) {
+        expect(v).toBe(prev % 2 === 0 ? prev / 2 : 3 * prev + 1)
+        prev = v
+      }
+    }
+  })
+
   it('stops and reports instead of stepping past the safe range', () => {
     /*
      * 319804831 is a known maximum-excursion record holder whose true
@@ -98,6 +132,24 @@ describe('parseStarts', () => {
     expect(parseStarts('1 2 3 4 5 6 7 8 9', 8)).toHaveProperty('error')
     expect(parseStarts('1 2 3 4 5 6 7 8', 8)).toEqual({
       starts: [1, 2, 3, 4, 5, 6, 7, 8],
+    })
+  })
+
+  it('ignores separators at either end of the field', () => {
+    /* Splitting on the edge separators leaves empty tokens to drop. */
+    expect(parseStarts(' 27, 97 ', 8)).toEqual({ starts: [27, 97] })
+    expect(parseStarts(',\n27\t', 8)).toEqual({ starts: [27] })
+  })
+
+  it('explains each kind of rejection in words', () => {
+    expect(parseStarts('   ', 8)).toEqual({
+      error: 'Enter at least one starting number.',
+    })
+    expect(parseStarts('27, banana', 8)).toEqual({
+      error: '"banana" is not a whole number between 1 and 10^15.',
+    })
+    expect(parseStarts('1 2 3 4 5 6 7 8 9', 8)).toEqual({
+      error: 'At most 8 starting numbers at a time.',
     })
   })
 })
