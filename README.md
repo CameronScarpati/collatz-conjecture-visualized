@@ -38,8 +38,9 @@ can plot, and it remains open.
 
 ## Using it
 
-Each view keeps its chart pinned while the controls and a short explanation scroll
-beside it. The trajectory explorer takes up to eight starting numbers typed directly,
+On wide screens each view keeps its chart pinned while the controls and a short
+explanation scroll beside it; narrow screens stack them under the chart. The
+trajectory explorer takes up to eight starting numbers typed directly,
 or a range mode that races every start up to two thousand at once with the longest
 trajectory highlighted; presets tell the good stories, including the famous 27 and
 the record breakers, and the axis toggles between log base 2 and linear. The tree
@@ -64,22 +65,22 @@ the unit tests, and `npm run lint` runs oxlint.
 ## How it is built
 
 React, TypeScript, and Vite, with all drawing done by hand on canvas inside a
-requestAnimationFrame loop. Each animated chart layers two or three canvases so
-static axes, accumulated data, and transient markers repaint independently, and the
-stopping time sweep runs inside an eight millisecond frame budget. D3 supplies only
-the scales. The math lives in pure modules with no React imports, covered by unit
-tests pinned to known values such as the 111 steps of 27 and the stopping time
-records below one hundred. KaTeX typesets the mathematics. The site is a single
-static page, deployable anywhere; the live copy is served from Netlify.
+requestAnimationFrame loop. Each animated chart layers two or three canvases so the
+static parts stay put while each frame draws only what changed, and the stopping time
+sweep computes in small batches that hand control back to the browser every frame. D3
+supplies only the scales. The math lives in pure modules with no React imports,
+covered by unit tests pinned to known values such as the 111 steps of 27 and the
+stopping time records below one hundred. KaTeX typesets the mathematics. The site is a
+single static page, deployable anywhere; the live copy is served from Netlify.
 
 ## Notes
 
-This is a teaching demo, not a research tool. Arithmetic runs in plain double
-precision with starts capped at 10^15 and a per-step guard that keeps every value
-below 2^53, so a trajectory that would leave the exact integer range stops and says
-so instead of silently losing precision; the conjecture itself has been verified far
-beyond that by dedicated searches. The tree layout has a node budget of 25,000 as a
-safety cap, which even the deepest setting stays under. This project began as a C++
+This is a teaching demo, not a search for counterexamples. Arithmetic runs in plain
+double precision with starts capped at 10^15 and a per-step guard that keeps every
+value below 2^53, so a trajectory that would leave the exact integer range stops and
+says so instead of silently losing precision; the conjecture itself has been verified
+far beyond that by dedicated searches. The tree layout has a node budget of 25,000 as
+a safety cap, which even the deepest setting stays under. This project began as a C++
 OpenGL desktop app, which lives on in the git history.
 
 ## Credits
