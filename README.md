@@ -40,17 +40,18 @@ can plot, and it remains open.
 
 On wide screens each view keeps its chart pinned while the controls and a short
 explanation scroll beside it; narrow screens stack them under the chart. The
-trajectory explorer takes up to eight starting numbers typed directly,
-or a range mode that races every start up to two thousand at once with the longest
-trajectory highlighted; presets tell the good stories, including the famous 27 and
-the record breakers, and the axis toggles between log base 2 and linear. The tree
-view has sliders for the two bend angles, the depth, and the growth speed, plus
-shape presets and an option to label the small numbers. The statistics view has one
-slider for how many starts to compute; the sweep spreads across animation frames so
-the scatter fills in as it runs. The trajectory and tree views have pause, restart,
-and finish controls and replay themselves when they complete. Every view honors the
-reduced motion preference by rendering the finished picture immediately and follows
-the light or dark theme with a manual toggle in the masthead.
+trajectory explorer takes up to eight starting numbers typed directly, or a range
+mode that races every start up to a limit you choose, as high as two thousand,
+with the longest trajectory highlighted; presets tell the good stories, including
+the famous 27 and the record breakers, and the axis toggles between log base 2 and
+linear. The tree view has sliders for the two bend angles, the depth, and the
+growth speed, plus shape presets and an option to label the small numbers. The
+statistics view has one slider for how many starts to compute; at the larger
+limits the sweep spreads across animation frames so the scatter fills in as it
+runs. The trajectory and tree views have pause, restart, and finish controls and,
+while animating, replay themselves when they complete. Every view honors the
+reduced motion preference by rendering the finished picture immediately and
+follows the light or dark theme with a manual toggle in the masthead.
 
 ## Running locally
 

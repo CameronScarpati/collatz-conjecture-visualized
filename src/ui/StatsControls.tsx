@@ -65,8 +65,18 @@ export function StatsControls({ config, onChange }: StatsControlsProps) {
         />
       </motion.label>
       <motion.p className="field-note" variants={itemVariants}>
-        The sweep spreads across animation frames, so the scatter fills in as
-        it runs, and the record setters are ringed once it finishes.
+        {reduced ? (
+          <>
+            With reduced motion on, the sweep is computed in one pass, so the
+            scatter appears finished with the record setters ringed.
+          </>
+        ) : (
+          <>
+            At the larger limits the sweep spreads across animation frames, so
+            the scatter fills in as it runs, and the record setters are ringed
+            once it finishes.
+          </>
+        )}
       </motion.p>
     </motion.form>
   )
