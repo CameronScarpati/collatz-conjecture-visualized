@@ -134,5 +134,20 @@ describe('buildHistogram', () => {
     expect(histogram.modalBin).toBe(0)
     /* Width 10 folds them into [0,10) and [10,20), holding 8 and 2. */
     expect(Array.from(buildHistogram(run, 10).bins)).toEqual([8, 2])
+    /*
+     * Width 19 divides the max exactly, so the max opens a bin of its
+     * own: [0,19) holds the other nine and [19,38) holds only n = 9.
+     */
+    expect(Array.from(buildHistogram(run, 19).bins)).toEqual([9, 1])
+  })
+
+  it('gives the default view a last bin that holds only its max', () => {
+    /*
+     * Below 100000 the max is 350 steps, reached only by 77031. That is
+     * a multiple of the default width 5, so 350 / 5 + 1 = 71 bins.
+     */
+    const histogram = buildHistogram(completedRun(100_000))
+    expect(histogram.bins.length).toBe(71)
+    expect(histogram.bins[70]).toBe(1)
   })
 })
