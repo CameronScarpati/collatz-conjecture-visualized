@@ -63,10 +63,16 @@ describe('trajectory started one step later', () => {
 
 describe('reverse tree against the forward map', () => {
   it('holds exactly the preimages of stepOnce, with depth as step count', () => {
-    /* From 2 up, since the tree drops the 4 -> 1 edge on purpose. */
+    /*
+     * From 2 up, since the tree drops the 4 -> 1 edge on purpose. Each
+     * preimage must appear exactly once, so a duplicated child fails as
+     * surely as a missing one.
+     */
     for (let n = 2; n <= 3_000; n += 1) {
-      expect(childrenOf(stepOnce(n))).toContain(n)
-      for (const child of childrenOf(n)) expect(stepOnce(child)).toBe(n)
+      expect(childrenOf(stepOnce(n)).filter((child) => child === n)).toHaveLength(1)
+      const children = childrenOf(n)
+      expect(new Set(children).size).toBe(children.length)
+      for (const child of children) expect(stepOnce(child)).toBe(n)
     }
     const config = { evenAngleDeg: 8, oddAngleDeg: 20, maxDepth: 40, nodeBudget: 3_000 }
     const { nodes } = growCoral(config)
