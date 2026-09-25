@@ -86,8 +86,8 @@ function App() {
       </main>
       <footer className="colophon">
         <p>
-          Built by <a href="https://github.com/CameronScarpati">Cameron Scarpati</a> as a
-          portfolio project.{' '}
+          Built by <a href="https://github.com/CameronScarpati">Cameron Scarpati</a> to
+          explore the Collatz conjecture.{' '}
           <a href="https://github.com/CameronScarpati/collatz-conjecture-visualized">
             Source on GitHub
           </a>
